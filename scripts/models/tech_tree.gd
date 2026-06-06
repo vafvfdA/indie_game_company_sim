@@ -59,6 +59,10 @@ func serialize() -> Dictionary:
 	}
 
 func deserialize(data: Dictionary):
-	researches = data.get("researches", researches)
+	var raw: Array = data.get("researches", [])
+	if raw.size() > 0:
+		researches.clear()
+		for item in raw:
+			researches.append(item as Dictionary)
 	current_index = data.get("current_index", -1)
 	research_progress = data.get("research_progress", 0)

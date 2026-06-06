@@ -46,10 +46,10 @@ func _on_confirm():
 		game_name = "游戏 #%d" % (GameManager.company.game_history.size() + 1)
 
 	var genre = genre_option.get_item_text(genre_option.selected)
-	var theme = theme_option.get_item_text(theme_option.selected)
+	var game_theme = theme_option.get_item_text(theme_option.selected)
 	var platform = platform_option.get_item_text(platform_option.selected)
 
-	if GameManager.start_project(game_name, genre, theme, platform):
+	if GameManager.start_project(game_name, genre, game_theme, platform):
 		print("项目已创建: ", game_name)
 		hide()
 	else:
