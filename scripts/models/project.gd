@@ -42,7 +42,9 @@ func develop(employees: Array) -> void:
 			"programmer":
 				contribution *= (1.0 + tech_bonuses.get("program", 0.0))
 				progress["program"] += contribution
-				var bug_chance := 0.1 * (1.0 - GameManager.tech_tree.get_bonus("bug_reduce")) if GameManager and GameManager.tech_tree else 0.1
+				var bug_chance: float = 0.1
+				if GameManager and GameManager.tech_tree:
+					bug_chance = 0.1 * (1.0 - GameManager.tech_tree.get_bonus("bug_reduce"))
 				if randf() < bug_chance:
 					bug_count += 1
 			"artist":
