@@ -7,8 +7,11 @@ signal money_changed(new_amount)
 signal not_enough_money
 signal employee_hired(employee)
 signal employee_fired(employee)
+signal employee_trained(employee)
+signal office_upgraded
 
 var company: Company
+var tech_tree: TechTree
 var current_project: GameProject = null
 var current_day: int = 1
 var current_month: int = 1
@@ -34,6 +37,7 @@ var compatibility: Dictionary = {
 func _ready():
 	print("GameManager _ready")
 	company = Company.new()
+	tech_tree = TechTree.new()
 	print("Company 创建完成, 资金: ", company.money)
 
 func start_project(game_name: String, genre: String, theme: String, platform: String) -> bool:
@@ -75,6 +79,8 @@ func advance_day():
 		if current_project.is_finished:
 			_ship_game()
 
+	advance_research()
+
 	day_passed.emit()
 
 func _ship_game():
@@ -94,6 +100,7 @@ func _calculate_sales(project: GameProject) -> Dictionary:
 	if project.genre in compatibility:
 		if project.theme in compatibility[project.genre]:
 			compat_mult = compatibility[project.genre][project.theme]
+	compat_mult += tech_tree.get_bonus("compat")
 
 	var final_score = clampf(base_score * compat_mult, 0, 100)
 
@@ -147,6 +154,9 @@ func get_employee_pool() -> Array:
 	return pool
 
 func hire_employee(employee) -> bool:
+	if company.get_employee_count() >= company.max_desks:
+		EventSystem.emit_event("工位已满！请先升级办公室。")
+		return false
 	if company.hire(employee):
 		employee.hired_day = current_day
 		money_changed.emit(company.money)
@@ -160,13 +170,146 @@ func fire_employee(employee):
 	company.fire(employee)
 	employee_fired.emit(employee)
 
+# --- Training ---
+
+func get_train_cost(employee) -> int:
+	return employee.skill * 1000 + 500
+
+func train_employee(employee) -> bool:
+	var cost = get_train_cost(employee)
+	if not company.can_afford(cost):
+		not_enough_money.emit()
+		return false
+	company.spend(cost)
+	employee.gain_experience(employee.skill * 10)
+	employee.morale = clampf(employee.morale + 0.1, 0, 1)
+	money_changed.emit(company.money)
+	employee_trained.emit(employee)
+	EventSystem.emit_event("培训了 %s，技能提升！" % employee.name)
+	return true
+
+# --- Office Upgrade ---
+
+func upgrade_office() -> bool:
+	if company.upgrade_office():
+		money_changed.emit(company.money)
+		office_upgraded.emit()
+		EventSystem.emit_event("办公室升级到 Lv%d！" % company.office_level)
+		return true
+	return false
+
+# --- Tech Tree ---
+
+func start_research(index: int) -> bool:
+	var cost = tech_tree.researches[index]["cost"]
+	if not company.can_afford(cost):
+		not_enough_money.emit()
+		return false
+	company.spend(cost)
+	money_changed.emit(company.money)
+	tech_tree.start_research(index)
+	EventSystem.emit_event("开始研究: %s" % tech_tree.researches[index]["name"])
+	return true
+
+func advance_research():
+	var result = tech_tree.advance_day()
+	if result.get("completed"):
+		EventSystem.emit_event("研究完成: %s！" % result["name"])
+
 func get_status_text() -> String:
 	var text = "=== %s ===\n" % company.name
 	text += "资金: %d 元\n" % company.money
 	text += "声望: %.1f\n" % company.reputation
 	text += "日期: %d年%d月%d日\n" % [current_year, current_month, current_day]
-	text += "员工: %d人 | 月工资: %d\n" % [company.get_employee_count(), company.get_monthly_salary()]
+	text += "员工: %d/%d人 | 月工资: %d\n" % [company.get_employee_count(), company.max_desks, company.get_monthly_salary()]
+	text += "办公室: Lv%d\n" % company.office_level
+	if tech_tree.is_researching():
+		var r = tech_tree.researches[tech_tree.current_index]
+		text += "研究: %s (%.0f%%)\n" % [r["name"], tech_tree.get_progress_percent()]
 	if current_project:
 		text += "\n当前项目: %s\n" % current_project.game_name
 		text += "进度: %.1f%%\n" % current_project.get_total_progress()
 	return text
+
+# --- Save / Load ---
+
+func save_game(slot: int = 0):
+	var data := {
+		"company": {
+			"name": company.name,
+			"money": company.money,
+			"reputation": company.reputation,
+			"office_level": company.office_level,
+			"game_history": company.game_history,
+			"employees": _serialize_employees(),
+		},
+		"tech_tree": tech_tree.serialize(),
+		"current_day": current_day,
+		"current_month": current_month,
+		"current_year": current_year,
+	}
+	var json := JSON.stringify(data)
+	var path := "user://save_%d.json" % slot
+	var file := FileAccess.open(path, FileAccess.WRITE)
+	file.store_string(json)
+	file.close()
+	EventSystem.emit_event("游戏已保存到存档 %d" % (slot + 1))
+
+func load_game(slot: int = 0) -> bool:
+	var path := "user://save_%d.json" % slot
+	if not FileAccess.file_exists(path):
+		return false
+	var file := FileAccess.open(path, FileAccess.READ)
+	var json := file.get_as_text()
+	file.close()
+	var parsed = JSON.parse_string(json)
+	if parsed == null:
+		return false
+	_apply_save_data(parsed)
+	EventSystem.emit_event("已读取存档 %d" % (slot + 1))
+	return true
+
+func has_save(slot: int) -> bool:
+	return FileAccess.file_exists("user://save_%d.json" % slot)
+
+func _serialize_employees() -> Array:
+	var arr := []
+	for emp in company.employees:
+		arr.append({
+			"name": emp.name,
+			"role": emp.role,
+			"skill": emp.skill,
+			"salary": emp.salary,
+			"morale": emp.morale,
+			"experience": emp.experience,
+		})
+	return arr
+
+func _apply_save_data(data: Dictionary):
+	company.name = data["company"].get("name", "独立工作室")
+	company.money = data["company"].get("money", 50000)
+	company.reputation = data["company"].get("reputation", 0)
+	company.office_level = data["company"].get("office_level", 1)
+	company.game_history = data["company"].get("game_history", [])
+	company.employees.clear()
+
+	for edata in data["company"].get("employees", []):
+		var emp := Employee.new()
+		emp.name = edata["name"]
+		emp.role = edata["role"]
+		emp.skill = edata["skill"]
+		emp.salary = edata["salary"]
+		emp.morale = edata["morale"]
+		emp.experience = edata["experience"]
+		company.employees.append(emp)
+
+	tech_tree.deserialize(data.get("tech_tree", {}))
+	current_day = data.get("current_day", 1)
+	current_month = data.get("current_month", 1)
+	current_year = data.get("current_year", 1)
+	current_project = null
+
+	day_passed.emit()
+	office_upgraded.emit()
+	for emp in company.employees:
+		employee_hired.emit(emp)

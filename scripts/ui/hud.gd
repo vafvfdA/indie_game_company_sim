@@ -10,15 +10,19 @@ extends Control
 @onready var btn_hire: Button = $BottomBar/VBox/ButtonBar/BtnHire
 @onready var btn_project: Button = $BottomBar/VBox/ButtonBar/BtnProject
 
+@onready var btn_train: Button = $BottomBar/VBox/ExtraBar/BtnTrain
+@onready var btn_tech: Button = $BottomBar/VBox/ExtraBar/BtnTech
+@onready var btn_upgrade: Button = $BottomBar/VBox/ExtraBar/BtnUpgrade
+@onready var btn_save: Button = $BottomBar/VBox/ExtraBar/BtnSave
+@onready var btn_load: Button = $BottomBar/VBox/ExtraBar/BtnLoad
+
 @onready var project_panel = $ProjectPanel
 @onready var hire_panel = $HirePanel
 @onready var result_panel = $ResultPanel
+@onready var train_panel = $TrainPanel
+@onready var tech_panel = $TechPanel
 
 func _ready():
-	print("HUD _ready 开始")
-	print("GameManager: ", GameManager)
-	print("GameManager.company: ", GameManager.company)
-
 	# 半透明紧凑面板样式
 	var top_style := StyleBoxFlat.new()
 	top_style.bg_color = Color("1a1a2e", 0.85)
@@ -46,15 +50,17 @@ func _ready():
 	btn_pause.pressed.connect(_on_pause_pressed)
 	btn_hire.pressed.connect(_on_hire_pressed)
 	btn_project.pressed.connect(_on_project_pressed)
+	btn_train.pressed.connect(_on_train_pressed)
+	btn_tech.pressed.connect(_on_tech_pressed)
+	btn_upgrade.pressed.connect(_on_upgrade_pressed)
+	btn_save.pressed.connect(_on_save_pressed)
+	btn_load.pressed.connect(_on_load_pressed)
 
 	btn_pause.disabled = true
 
-	print("HUD 信号连接完成")
 	_update_ui()
-	print("HUD _ready 结束")
 
 func _on_start_pressed():
-	print("点击了开始")
 	if time_system:
 		time_system.start()
 		btn_start.disabled = true
@@ -62,7 +68,6 @@ func _on_start_pressed():
 		event_label.text = "事件: 游戏开始运行！"
 
 func _on_pause_pressed():
-	print("点击了暂停")
 	if time_system:
 		time_system.stop()
 		btn_start.disabled = false
@@ -70,20 +75,53 @@ func _on_pause_pressed():
 		event_label.text = "事件: 已暂停"
 
 func _on_hire_pressed():
-	print("点击了招聘")
 	if hire_panel:
 		hire_panel.show_hire_panel()
 
 func _on_project_pressed():
-	print("点击了项目")
 	if project_panel:
 		project_panel.show_project_panel()
+
+func _on_train_pressed():
+	if train_panel:
+		train_panel.show_train_panel()
+
+func _on_tech_pressed():
+	if tech_panel:
+		tech_panel.show_tech_panel()
+
+func _on_upgrade_pressed():
+	if not GameManager.company.can_upgrade():
+		event_label.text = "办公室已满级！"
+		return
+	var cost = GameManager.company.get_upgrade_cost()
+	if not GameManager.company.can_afford(cost):
+		event_label.text = "资金不足！需要 %d 元" % cost
+		return
+	GameManager.upgrade_office()
+	_update_ui()
+
+func _on_save_pressed():
+	GameManager.save_game(0)
+	_update_ui()
+
+func _on_load_pressed():
+	if GameManager.load_game(0):
+		_update_ui()
+	else:
+		event_label.text = "没有找到存档"
 
 func _update_ui():
 	if GameManager and GameManager.company:
 		status_label.text = GameManager.get_status_text()
 		if GameManager.current_project:
 			status_label.text += GameManager.current_project.get_progress_detail()
+		# Update upgrade button text
+		if btn_upgrade:
+			if GameManager.company.can_upgrade():
+				btn_upgrade.text = "升级(%d)" % GameManager.company.get_upgrade_cost()
+			else:
+				btn_upgrade.text = "已满级"
 
 func _on_event(text: String):
 	event_label.text = "事件: " + text

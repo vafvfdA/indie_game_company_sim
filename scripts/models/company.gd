@@ -8,6 +8,25 @@ var employees: Array = []
 var game_history: Array = []
 var office_level: int = 1
 
+var max_desks: int:
+	get: return 4 + (office_level - 1) * 4
+
+func get_upgrade_cost() -> int:
+	return office_level * 10000
+
+func can_upgrade() -> bool:
+	return office_level < 3
+
+func upgrade_office() -> bool:
+	if not can_upgrade():
+		return false
+	var cost = get_upgrade_cost()
+	if not can_afford(cost):
+		return false
+	spend(cost)
+	office_level += 1
+	return true
+
 func can_afford(amount: int) -> bool:
 	return money >= amount
 

@@ -28,19 +28,31 @@ func develop(employees: Array) -> void:
 	if is_finished:
 		return
 
+	# Tech tree bonuses
+	var tech_bonuses := {}
+	if GameManager and GameManager.tech_tree:
+		for effect in ["program", "art", "audio", "design"]:
+			tech_bonuses[effect] = GameManager.tech_tree.get_bonus(effect)
+		var bug_reduce = GameManager.tech_tree.get_bonus("bug_reduce")
+
 	for emp in employees:
 		var contribution = emp.work()
+		# Apply tech bonus
 		match emp.role:
 			"programmer":
+				contribution *= (1.0 + tech_bonuses.get("program", 0.0))
 				progress["program"] += contribution
-				# 偶尔产生 Bug
-				if randf() < 0.1:
+				var bug_chance := 0.1 * (1.0 - GameManager.tech_tree.get_bonus("bug_reduce")) if GameManager and GameManager.tech_tree else 0.1
+				if randf() < bug_chance:
 					bug_count += 1
 			"artist":
+				contribution *= (1.0 + tech_bonuses.get("art", 0.0))
 				progress["art"] += contribution
 			"designer":
+				contribution *= (1.0 + tech_bonuses.get("design", 0.0))
 				progress["design"] += contribution
 			"musician":
+				contribution *= (1.0 + tech_bonuses.get("audio", 0.0))
 				progress["audio"] += contribution
 		emp.gain_experience(1)
 
