@@ -24,6 +24,7 @@ driver/driver="WinSound"
 
 [autoload]
 
+ThemeManager="*res://scripts/autoload/theme_manager.gd"
 GameManager="*res://scripts/autoload/game_manager.gd"
 EventSystem="*res://scripts/autoload/event_system.gd"
 
@@ -36,3 +37,4 @@ window/size/viewport_height=720
 
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
+textures/canvas_textures/default_texture_filter=0
