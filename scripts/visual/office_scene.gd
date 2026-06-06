@@ -101,7 +101,7 @@ func _setup_desks():
 	var count: int = GameManager.company.max_desks
 	for i in count:
 		var col: int = i % DESK_COLS
-		var row: int = i / DESK_COLS
+		var row: int = floori(float(i) / DESK_COLS)
 		var pos := Vector2(OFFICE_START_X + col * DESK_GAP_X, OFFICE_START_Y + row * DESK_GAP_Y)
 		_desk_positions.append(pos)
 		_draw_desk(pos, i)
@@ -112,7 +112,7 @@ func _on_office_upgraded():
 	var new_count: int = GameManager.company.max_desks
 	for i in range(old_count, new_count):
 		var col: int = i % DESK_COLS
-		var row: int = i / DESK_COLS
+		var row: int = floori(float(i) / DESK_COLS)
 		var pos := Vector2(OFFICE_START_X + col * DESK_GAP_X, OFFICE_START_Y + row * DESK_GAP_Y)
 		_desk_positions.append(pos)
 		_draw_desk(pos, i)

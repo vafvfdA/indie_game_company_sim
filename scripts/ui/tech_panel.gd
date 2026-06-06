@@ -19,7 +19,7 @@ func _refresh_list():
 
 	var tt := GameManager.tech_tree
 	for i in tt.researches.size():
-		var r := tt.researches[i]
+		var r: Dictionary = tt.researches[i]
 		var hbox := HBoxContainer.new()
 
 		var label := Label.new()

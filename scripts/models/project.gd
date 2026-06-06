@@ -33,7 +33,7 @@ func develop(employees: Array) -> void:
 	if GameManager and GameManager.tech_tree:
 		for effect in ["program", "art", "audio", "design"]:
 			tech_bonuses[effect] = GameManager.tech_tree.get_bonus(effect)
-		var bug_reduce = GameManager.tech_tree.get_bonus("bug_reduce")
+		var _bug_reduce = GameManager.tech_tree.get_bonus("bug_reduce")
 
 	for emp in employees:
 		var contribution = emp.work()

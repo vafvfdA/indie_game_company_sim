@@ -33,8 +33,8 @@ func _setup_options():
 		genre_option.add_item(genre)
 
 	theme_option.clear()
-	for theme in GameManager.themes:
-		theme_option.add_item(theme)
+	for t in GameManager.themes:
+		theme_option.add_item(t)
 
 	platform_option.clear()
 	for platform in GameManager.platforms:

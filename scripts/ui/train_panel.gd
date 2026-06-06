@@ -38,7 +38,7 @@ func _refresh_list():
 
 	info_label.text = "员工培训 (资金: %d)" % GameManager.company.money
 
-func _on_train(emp: Employee, hbox: HBoxContainer, btn: Button):
+func _on_train(emp: Employee, _hbox: HBoxContainer, _btn: Button):
 	if GameManager.train_employee(emp):
 		info_label.text = "培训成功！%s 技能提升" % emp.name
 		_refresh_list()
