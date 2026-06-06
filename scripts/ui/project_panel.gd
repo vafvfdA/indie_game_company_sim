@@ -22,7 +22,10 @@ func show_project_panel():
 		]
 		btn_confirm.disabled = true
 	else:
+		var hint = GameManager.get_market_hint()
 		info_label.text = "创建新项目"
+		if not hint.is_empty():
+			info_label.text += "\n" + hint
 		btn_confirm.disabled = false
 		_setup_options()
 	show()

@@ -122,6 +122,10 @@ func _update_ui():
 				btn_upgrade.text = "升级(%d)" % GameManager.company.get_upgrade_cost()
 			else:
 				btn_upgrade.text = "已满级"
+		# Update rank display in title
+		var title_label = $TopBar/HBox/Title
+		if title_label and GameManager.company:
+			title_label.text = GameManager.company.get_rank_title()
 
 func _on_event(text: String):
 	event_label.text = "事件: " + text

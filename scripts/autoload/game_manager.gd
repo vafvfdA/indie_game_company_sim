@@ -71,9 +71,25 @@ func advance_day():
 		if salaries > 0:
 			EventSystem.emit_event("发工资: 支出 %d 元" % salaries)
 
+		# Monthly rent
+		var rent = company.get_rent()
+		if rent > 0:
+			if company.can_afford(rent):
+				company.spend(rent)
+				EventSystem.emit_event("交租金: 支出 %d 元" % rent)
+			else:
+				EventSystem.emit_event("交不起租金！员工士气下降")
+				for emp in company.employees:
+					emp.morale = clampf(emp.morale - 0.2, 0, 1)
+
 		if current_month > 12:
 			current_month = 1
 			current_year += 1
+
+	# Employee raise demands (every 60 days)
+	var total_days = (current_year - 1) * 360 + (current_month - 1) * 30 + current_day
+	if total_days > 0 and total_days % 60 == 0:
+		_check_raise_demands()
 
 	if current_project:
 		current_project.develop(company.employees)
@@ -102,6 +118,7 @@ func _calculate_sales(project: GameProject) -> Dictionary:
 		if project.theme in compatibility[project.genre]:
 			compat_mult = compatibility[project.genre][project.theme]
 	compat_mult += tech_tree.get_bonus("compat")
+	compat_mult += get_market_bonus(project.genre, project.theme)
 
 	var final_score = clampf(base_score * compat_mult, 0, 100)
 
@@ -217,9 +234,41 @@ func advance_research():
 	if result.get("completed"):
 		EventSystem.emit_event("研究完成: %s！" % result["name"])
 
+# --- Employee Raises ---
+
+func _check_raise_demands():
+	for emp in company.employees:
+		if emp.salary < 3000:
+			emp.salary += 200
+			EventSystem.emit_event("%s 要求涨薪！新工资: %d" % [emp.name, emp.salary])
+
+# --- Market Demand ---
+
+var _market_demand: Dictionary = {
+	1: {"genre": "RPG", "theme": "奇幻", "desc": "新年RPG热潮"},
+	3: {"genre": "AVG", "theme": "恐怖", "desc": "春季恐怖游戏季"},
+	6: {"genre": "ACT", "theme": "武侠", "desc": "暑期动作游戏热"},
+	7: {"genre": "STG", "theme": "科幻", "desc": "暑假科幻射击季"},
+	10: {"genre": "SLG", "theme": "历史", "desc": "秋季策略游戏季"},
+	12: {"genre": "RPG", "theme": "奇幻", "desc": "年末RPG大作季"},
+}
+
+func get_market_hint() -> String:
+	if current_month in _market_demand:
+		var m = _market_demand[current_month]
+		return "当前热门: %s+%s (%s)" % [m["genre"], m["theme"], m["desc"]]
+	return ""
+
+func get_market_bonus(genre: String, theme: String) -> float:
+	if current_month in _market_demand:
+		var m = _market_demand[current_month]
+		if m["genre"] == genre and m["theme"] == theme:
+			return 0.2
+	return 0.0
+
 func get_status_text() -> String:
-	var text = "=== %s ===\n" % company.name
-	text += "资金: %d 元\n" % company.money
+	var text = "=== %s [%s] ===\n" % [company.name, company.get_rank_title()]
+	text += "资金: %d 元 | 月租: %d\n" % [company.money, company.get_rent()]
 	text += "声望: %.1f\n" % company.reputation
 	text += "日期: %d年%d月%d日\n" % [current_year, current_month, current_day]
 	text += "员工: %d/%d人 | 月工资: %d\n" % [company.get_employee_count(), company.max_desks, company.get_monthly_salary()]

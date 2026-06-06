@@ -5,6 +5,7 @@ extends Node2D
 var _desk_positions: Array[Vector2] = []
 var _desk_nodes: Array[Dictionary] = []  # {base, monitor_sprite}
 var _sprites: Dictionary = {}  # Employee -> EmployeeSprite
+var _decoration_nodes: Array[Node] = []
 
 const DESK_GAP_X := 150.0
 const DESK_GAP_Y := 120.0
@@ -16,7 +17,7 @@ const ENTRANCE := Vector2(640, 700)
 func _ready():
 	_draw_floor()
 	_draw_walls()
-	_draw_decorations()
+	_redraw_decorations()
 	_setup_desks()
 	GameManager.employee_hired.connect(_on_employee_hired)
 	GameManager.employee_fired.connect(_on_employee_fired)
@@ -53,50 +54,57 @@ func _draw_walls():
 	name_label.z_index = -4
 	add_child(name_label)
 
-func _draw_decorations():
-	# Bookshelf (left)
-	var shelf_tex := PixelBuilder.bookshelf_texture()
-	var shelf := Sprite2D.new()
-	shelf.texture = shelf_tex
-	shelf.position = Vector2(60, 180)
-	shelf.scale = Vector2(2, 2)
-	shelf.z_index = -3
-	add_child(shelf)
+func _redraw_decorations():
+	# Clear old decorations
+	for node in _decoration_nodes:
+		node.queue_free()
+	_decoration_nodes.clear()
 
-	# Plant (right)
+	var level: int = GameManager.company.office_level
 	var plant_tex := PixelBuilder.plant_texture()
-	var plant := Sprite2D.new()
-	plant.texture = plant_tex
-	plant.position = Vector2(1200, 180)
-	plant.scale = Vector2(2, 2)
-	plant.z_index = -3
-	add_child(plant)
-
-	# Coffee machine (bottom left)
+	var shelf_tex := PixelBuilder.bookshelf_texture()
 	var coffee_tex := PixelBuilder.coffee_machine_texture()
-	var coffee := Sprite2D.new()
-	coffee.texture = coffee_tex
-	coffee.position = Vector2(60, 640)
-	coffee.scale = Vector2(2, 2)
-	coffee.z_index = -3
-	add_child(coffee)
-
-	# Whiteboard (top right)
 	var wb_tex := PixelBuilder.whiteboard_texture()
-	var wb := Sprite2D.new()
-	wb.texture = wb_tex
-	wb.position = Vector2(1100, 80)
-	wb.scale = Vector2(2, 2)
-	wb.z_index = -3
-	add_child(wb)
 
-	# Another plant (bottom right)
-	var plant2 := Sprite2D.new()
-	plant2.texture = plant_tex
-	plant2.position = Vector2(1200, 640)
-	plant2.scale = Vector2(2, 2)
-	plant2.z_index = -3
-	add_child(plant2)
+	# Lv1: minimal — just one plant
+	_add_decoration_sprite(plant_tex, Vector2(1200, 640), 2)
+
+	if level >= 2:
+		# Lv2: add bookshelf + second plant
+		_add_decoration_sprite(shelf_tex, Vector2(60, 180), 2)
+		_add_decoration_sprite(plant_tex, Vector2(1200, 180), 2)
+
+	if level >= 3:
+		# Lv3: add coffee machine + whiteboard
+		_add_decoration_sprite(coffee_tex, Vector2(60, 640), 2)
+		_add_decoration_sprite(wb_tex, Vector2(1100, 80), 2)
+
+	if level >= 4:
+		# Lv4: more plants, extra bookshelf
+		_add_decoration_sprite(plant_tex, Vector2(60, 400), 2)
+		_add_decoration_sprite(shelf_tex, Vector2(1200, 400), 2)
+
+	if level >= 5:
+		# Lv5: trophy wall (gold rectangles), extra decorations
+		_add_decoration_sprite(plant_tex, Vector2(640, 130), 2)
+		_add_decoration_sprite(plant_tex, Vector2(100, 640), 2)
+		# Trophy shelf
+		var trophy := ColorRect.new()
+		trophy.size = Vector2(200, 40)
+		trophy.position = Vector2(540, 120)
+		trophy.color = Color("ffd700")
+		trophy.z_index = -3
+		add_child(trophy)
+		_decoration_nodes.append(trophy)
+
+func _add_decoration_sprite(tex: ImageTexture, pos: Vector2, scale_factor: float):
+	var sp := Sprite2D.new()
+	sp.texture = tex
+	sp.position = pos
+	sp.scale = Vector2(scale_factor, scale_factor)
+	sp.z_index = -3
+	add_child(sp)
+	_decoration_nodes.append(sp)
 
 func _setup_desks():
 	var count: int = GameManager.company.max_desks
@@ -108,6 +116,7 @@ func _setup_desks():
 		_draw_desk(pos, i)
 
 func _on_office_upgraded():
+	_redraw_decorations()
 	# Add new desks for the upgraded level
 	var old_count: int = _desk_positions.size()
 	var new_count: int = GameManager.company.max_desks
@@ -194,3 +203,5 @@ func _on_game_loaded():
 	# Reset monitor textures
 	for desk in _desk_nodes:
 		desk["monitor"].texture = PixelBuilder.monitor_texture(false)
+	# Redraw decorations for current office level
+	_redraw_decorations()
