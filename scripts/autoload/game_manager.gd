@@ -9,6 +9,7 @@ signal employee_hired(employee)
 signal employee_fired(employee)
 signal employee_trained(employee)
 signal office_upgraded
+signal game_loaded
 
 var company: Company
 var tech_tree: RefCounted
@@ -310,6 +311,7 @@ func _apply_save_data(data: Dictionary):
 	current_project = null
 
 	day_passed.emit()
+	game_loaded.emit()
 	office_upgraded.emit()
 	for emp in company.employees:
 		employee_hired.emit(emp)

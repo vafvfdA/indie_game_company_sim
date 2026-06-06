@@ -23,6 +23,7 @@ func _ready():
 	GameManager.day_passed.connect(_on_day_passed)
 	GameManager.game_shipped.connect(_on_game_shipped)
 	GameManager.office_upgraded.connect(_on_office_upgraded)
+	GameManager.game_loaded.connect(_on_game_loaded)
 
 func _draw_floor():
 	var floor_tex := PixelBuilder.floor_tile_texture()
@@ -184,3 +185,12 @@ func _on_day_passed():
 func _on_game_shipped(_result: Dictionary):
 	for sprite in _sprites.values():
 		sprite.celebrate()
+
+func _on_game_loaded():
+	# Clear all existing employee sprites before re-adding from save
+	for sprite in _sprites.values():
+		sprite.queue_free()
+	_sprites.clear()
+	# Reset monitor textures
+	for desk in _desk_nodes:
+		desk["monitor"].texture = PixelBuilder.monitor_texture(false)
