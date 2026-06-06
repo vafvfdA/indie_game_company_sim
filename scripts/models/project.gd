@@ -58,6 +58,10 @@ func develop(employees: Array) -> void:
 				progress["audio"] += contribution
 		emp.gain_experience(1)
 
+	# Cap progress at required values
+	for key in progress:
+		progress[key] = minf(progress[key], required[key])
+
 	if _all_done():
 		_calculate_quality()
 		is_finished = true
