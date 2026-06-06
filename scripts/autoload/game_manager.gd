@@ -11,7 +11,7 @@ signal employee_trained(employee)
 signal office_upgraded
 
 var company: Company
-var tech_tree: TechTree
+var tech_tree: RefCounted
 var current_project: GameProject = null
 var current_day: int = 1
 var current_month: int = 1
@@ -37,7 +37,7 @@ var compatibility: Dictionary = {
 func _ready():
 	print("GameManager _ready")
 	company = Company.new()
-	tech_tree = TechTree.new()
+	tech_tree = load("res://scripts/models/tech_tree.gd").new()
 	print("Company 创建完成, 资金: ", company.money)
 
 func start_project(game_name: String, genre: String, theme: String, platform: String) -> bool:

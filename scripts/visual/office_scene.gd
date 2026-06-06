@@ -98,21 +98,21 @@ func _draw_decorations():
 	add_child(plant2)
 
 func _setup_desks():
-	var count = GameManager.company.max_desks
+	var count: int = GameManager.company.max_desks
 	for i in count:
-		var col := i % DESK_COLS
-		var row := i / DESK_COLS
+		var col: int = i % DESK_COLS
+		var row: int = i / DESK_COLS
 		var pos := Vector2(OFFICE_START_X + col * DESK_GAP_X, OFFICE_START_Y + row * DESK_GAP_Y)
 		_desk_positions.append(pos)
 		_draw_desk(pos, i)
 
 func _on_office_upgraded():
 	# Add new desks for the upgraded level
-	var old_count = _desk_positions.size()
-	var new_count = GameManager.company.max_desks
+	var old_count: int = _desk_positions.size()
+	var new_count: int = GameManager.company.max_desks
 	for i in range(old_count, new_count):
-		var col := i % DESK_COLS
-		var row := i / DESK_COLS
+		var col: int = i % DESK_COLS
+		var row: int = i / DESK_COLS
 		var pos := Vector2(OFFICE_START_X + col * DESK_GAP_X, OFFICE_START_Y + row * DESK_GAP_Y)
 		_desk_positions.append(pos)
 		_draw_desk(pos, i)
