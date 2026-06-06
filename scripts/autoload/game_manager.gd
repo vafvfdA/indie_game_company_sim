@@ -5,6 +5,8 @@ signal month_passed
 signal game_shipped(result)
 signal money_changed(new_amount)
 signal not_enough_money
+signal employee_hired(employee)
+signal employee_fired(employee)
 
 var company: Company
 var current_project: GameProject = null
@@ -148,6 +150,7 @@ func hire_employee(employee) -> bool:
 	if company.hire(employee):
 		employee.hired_day = current_day
 		money_changed.emit(company.money)
+		employee_hired.emit(employee)
 		print("雇佣了: ", employee.name, " ", employee.get_role_name())
 		return true
 	not_enough_money.emit()
@@ -155,6 +158,7 @@ func hire_employee(employee) -> bool:
 
 func fire_employee(employee):
 	company.fire(employee)
+	employee_fired.emit(employee)
 
 func get_status_text() -> String:
 	var text = "=== %s ===\n" % company.name

@@ -1,10 +1,11 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/hud.gd" id="1_hud"]
 [ext_resource type="Script" path="res://scripts/ui/project_panel.gd" id="2_proj"]
 [ext_resource type="Script" path="res://scripts/ui/hire_panel.gd" id="3_hire"]
 [ext_resource type="Script" path="res://scripts/ui/result_panel.gd" id="4_result"]
 [ext_resource type="Script" path="res://scripts/systems/time_system.gd" id="5_time"]
+[ext_resource type="Script" path="res://scripts/visual/office_scene.gd" id="6_office"]
 
 [node name="Main" type="Control"]
 layout_mode = 3
@@ -15,73 +16,80 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_hud")
 
-[node name="BG" type="ColorRect" parent="."]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-color = Color(0.12, 0.12, 0.18, 1)
+[node name="OfficeLayer" type="CanvasLayer" parent="."]
+layer = -1
 
-[node name="VBox" type="VBoxContainer" parent="."]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 20.0
-offset_top = 20.0
-offset_right = -20.0
-offset_bottom = -20.0
+[node name="OfficeScene" type="Node2D" parent="OfficeLayer"]
+script = ExtResource("6_office")
 
-[node name="TopBar" type="HBoxContainer" parent="VBox"]
+[node name="Employees" type="Node2D" parent="OfficeLayer/OfficeScene"]
+
+[node name="TopBar" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 40.0
+grow_horizontal = 2
+
+[node name="HBox" type="HBoxContainer" parent="TopBar"]
 layout_mode = 2
 
-[node name="Title" type="Label" parent="VBox/TopBar"]
+[node name="Title" type="Label" parent="TopBar/HBox"]
 layout_mode = 2
 text = "独立游戏公司模拟"
 
-[node name="Spacer" type="Control" parent="VBox/TopBar"]
+[node name="Sep" type="VSeparator" parent="TopBar/HBox"]
+layout_mode = 2
+
+[node name="StatusLabel" type="Label" parent="TopBar/HBox"]
 layout_mode = 2
 size_flags_horizontal = 3
+text = "加载中..."
 
-[node name="SpeedLabel" type="Label" parent="VBox/TopBar"]
+[node name="Sep2" type="VSeparator" parent="TopBar/HBox"]
+layout_mode = 2
+
+[node name="SpeedLabel" type="Label" parent="TopBar/HBox"]
 layout_mode = 2
 text = "速度: 1x"
 
-[node name="HSep" type="HSeparator" parent="VBox"]
+[node name="BottomBar" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -80.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="VBox" type="VBoxContainer" parent="BottomBar"]
 layout_mode = 2
 
-[node name="StatusLabel" type="Label" parent="VBox"]
-layout_mode = 2
-size_flags_vertical = 3
-text = "加载中..."
-
-[node name="HSep2" type="HSeparator" parent="VBox"]
-layout_mode = 2
-
-[node name="EventLabel" type="Label" parent="VBox"]
+[node name="EventLabel" type="Label" parent="BottomBar/VBox"]
 layout_mode = 2
 text = "欢迎！请先招聘员工，然后创建项目。"
 
-[node name="ButtonBar" type="HBoxContainer" parent="VBox"]
+[node name="ButtonBar" type="HBoxContainer" parent="BottomBar/VBox"]
 layout_mode = 2
 
-[node name="BtnStart" type="Button" parent="VBox/ButtonBar"]
+[node name="BtnStart" type="Button" parent="BottomBar/VBox/ButtonBar"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "开始"
 
-[node name="BtnPause" type="Button" parent="VBox/ButtonBar"]
+[node name="BtnPause" type="Button" parent="BottomBar/VBox/ButtonBar"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "暂停"
 disabled = true
 
-[node name="BtnProject" type="Button" parent="VBox/ButtonBar"]
+[node name="BtnProject" type="Button" parent="BottomBar/VBox/ButtonBar"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "项目"
 
-[node name="BtnHire" type="Button" parent="VBox/ButtonBar"]
+[node name="BtnHire" type="Button" parent="BottomBar/VBox/ButtonBar"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "招聘"

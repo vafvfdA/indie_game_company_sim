@@ -68,7 +68,7 @@ func _build_theme():
 
 	# --- Panel / PanelContainer ---
 	var panel_bg := StyleBoxFlat.new()
-	panel_bg.bg_color = BG_DARK
+	panel_bg.bg_color = Color("1a1a2e", 0.85)
 	panel_bg.border_color = ACCENT
 	panel_bg.set_border_width_all(2)
 	panel_bg.set_corner_radius_all(0)

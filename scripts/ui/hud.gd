@@ -1,14 +1,14 @@
 extends Control
 
-@onready var status_label: Label = $VBox/StatusLabel
-@onready var event_label: Label = $VBox/EventLabel
-@onready var speed_label: Label = $VBox/TopBar/SpeedLabel
+@onready var status_label: Label = $TopBar/HBox/StatusLabel
+@onready var event_label: Label = $BottomBar/VBox/EventLabel
+@onready var speed_label: Label = $TopBar/HBox/SpeedLabel
 @onready var time_system: Node = $TimeSystem
 
-@onready var btn_start: Button = $VBox/ButtonBar/BtnStart
-@onready var btn_pause: Button = $VBox/ButtonBar/BtnPause
-@onready var btn_hire: Button = $VBox/ButtonBar/BtnHire
-@onready var btn_project: Button = $VBox/ButtonBar/BtnProject
+@onready var btn_start: Button = $BottomBar/VBox/ButtonBar/BtnStart
+@onready var btn_pause: Button = $BottomBar/VBox/ButtonBar/BtnPause
+@onready var btn_hire: Button = $BottomBar/VBox/ButtonBar/BtnHire
+@onready var btn_project: Button = $BottomBar/VBox/ButtonBar/BtnProject
 
 @onready var project_panel = $ProjectPanel
 @onready var hire_panel = $HirePanel
@@ -18,6 +18,23 @@ func _ready():
 	print("HUD _ready 开始")
 	print("GameManager: ", GameManager)
 	print("GameManager.company: ", GameManager.company)
+
+	# 半透明紧凑面板样式
+	var top_style := StyleBoxFlat.new()
+	top_style.bg_color = Color("1a1a2e", 0.85)
+	top_style.border_color = Color("0f3460")
+	top_style.set_border_width_all(0)
+	top_style.set_corner_radius_all(0)
+	top_style.set_content_margin_all(6)
+	$TopBar.add_theme_stylebox_override("panel", top_style)
+
+	var bottom_style := StyleBoxFlat.new()
+	bottom_style.bg_color = Color("1a1a2e", 0.85)
+	bottom_style.border_color = Color("0f3460")
+	bottom_style.set_border_width_all(0)
+	bottom_style.set_corner_radius_all(0)
+	bottom_style.set_content_margin_all(6)
+	$BottomBar.add_theme_stylebox_override("panel", bottom_style)
 
 	# 连接信号
 	GameManager.day_passed.connect(_update_ui)

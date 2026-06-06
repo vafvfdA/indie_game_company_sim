@@ -12,27 +12,50 @@
 game/
 ├── project.godot                        # Godot 项目配置（入口）
 ├── README.md                            # 本文件
+├── assets/
+│   └── fonts/
+│       └── zpix.ttf                     # 像素字体（最像素）
 ├── scenes/
 │   └── main/
-│       └── main.tscn                    # 主场景（UI布局，所有节点在这里）
+│       └── main.tscn                    # 主场景
 └── scripts/
     ├── autoload/
     │   ├── game_manager.gd              # 核心管理器（全局单例）
-    │   └── event_system.gd              # 随机事件系统（全局单例）
+    │   ├── event_system.gd              # 随机事件系统（全局单例）
+    │   └── theme_manager.gd             # 像素UI主题（全局单例）
     ├── models/
     │   ├── employee.gd                  # 员工数据模型
     │   ├── project.gd                   # 游戏项目模型
     │   └── company.gd                   # 公司数据模型
     ├── systems/
     │   └── time_system.gd               # 时间推进系统（Timer驱动）
+    ├── visual/
+    │   ├── pixel_builder.gd             # 像素画生成工具（静态类）
+    │   ├── employee_sprite.gd           # 员工精灵（AnimatedSprite2D）
+    │   └── office_scene.gd              # 办公室场景管理
     └── ui/
-        ├── hud.gd                       # 主界面控制（绑定在Main节点）
+        ├── hud.gd                       # 主界面控制
         ├── project_panel.gd             # 创建项目弹窗
         ├── hire_panel.gd                # 招聘弹窗
         └── result_panel.gd              # 发售结果弹窗
 ```
 
 ## 核心架构
+
+### 场景层级
+
+```
+Main (Control + hud.gd)
+├── OfficeLayer (CanvasLayer, layer=-1)    # 2D办公室场景（渲染在UI后面）
+│   └── OfficeScene (Node2D)
+│       ├── 地板/墙壁（像素纹理 Sprite2D）
+│       ├── 家具（桌子/显示器/椅子 Sprite2D）
+│       └── Employees (Node2D)            # 动态生成的员工精灵
+├── TopBar (PanelContainer)                # 顶部状态条：标题/状态/速度
+├── BottomBar (PanelContainer)             # 底部操作条：事件通知/按钮
+├── TimeSystem (Node)
+└── 弹窗面板 (ProjectPanel/HirePanel/ResultPanel)
+```
 
 ### 数据流
 
@@ -41,9 +64,17 @@ game/
   → hud.gd 响应 pressed 信号
     → 调用 game_manager.gd 的功能函数
       → 操作 company.gd / project.gd 的数据
-        → 触发信号 day_passed / game_shipped
+        → 触发信号 day_passed / game_shipped / employee_hired
+          → office_scene.gd 更新办公室视觉
           → hud.gd 更新界面显示
 ```
+
+### 像素画系统
+
+`pixel_builder.gd` 是静态工具类，用代码定义像素图案并转换为 ImageTexture：
+- 角色：12x16 像素，3 套动画帧（idle/walk/work）
+- 家具：桌子、显示器、椅子、书架、盆栽等均为程序化生成
+- 所有纹理 3 倍缩放，Nearest 插值保持像素锐利
 
 ### 时间系统
 
@@ -68,71 +99,57 @@ game/
 | company.gd | Company | name, money, reputation, employees | hire(), fire(), pay_salaries() |
 
 **Employee 职业类型：**
-- `programmer` 程序员 → 开发 program 进度，偶尔产生 Bug
-- `artist` 美术 → 开发 art 进度
-- `designer` 策划 → 开发 design 进度
-- `musician` 音乐 → 开发 audio 进度
+- `programmer` 程序员 → 蓝色衬衫，开发 program 进度，偶尔产生 Bug
+- `artist` 美术 → 粉色衬衫，开发 art 进度
+- `designer` 策划 → 青色衬衫，开发 design 进度
+- `musician` 音乐 → 黄色衬衫，开发 audio 进度
 
 ### autoload/ — 全局单例
 
 **game_manager.gd (GameManager)**
-- 任何脚本都可以直接调用 `GameManager.xxx`
 - 管理公司、项目、员工池
-- 关键函数：
-  - `start_project(name, genre, theme, platform)` → 创建项目
-  - `advance_day()` → 推进一天
-  - `hire_employee(emp)` → 雇佣员工
-  - `get_employee_pool()` → 生成6个随机可招聘员工
-  - `get_status_text()` → 返回状态文字
+- 关键信号：`day_passed`, `game_shipped`, `employee_hired`, `employee_fired`
+- 关键函数：`start_project()`, `advance_day()`, `hire_employee()`, `get_employee_pool()`
 
 **event_system.gd (EventSystem)**
 - `check_random_events()` → 每天检查是否触发随机事件
 - `emit_event(text)` → 记录并广播事件
 
-### systems/ — 游戏系统
+**theme_manager.gd (ThemeManager)**
+- 加载 Zpix 像素字体
+- 运行时构建像素风格主题（硬边框、深色配色）
+- 应用到根节点，所有 UI 控件自动继承
 
-**time_system.gd**
-- 绑定在 Main 场景的 TimeSystem 节点上
-- `start()` → 启动 Timer
-- `stop()` → 停止 Timer
-- Timer 每隔 tick_interval 秒触发 advance_day()
+### visual/ — 视觉层
+
+**pixel_builder.gd (PixelBuilder)**
+- 静态工具类，无需实例化
+- `make_texture()` → 从颜色数组生成 ImageTexture
+- `make_from_map()` → 从字符映射图生成纹理
+- 预定义：角色帧、家具纹理、地板/墙壁纹理
+
+**employee_sprite.gd**
+- AnimatedSprite2D 基础的员工精灵
+- 动画状态：idle（待机）、walk（走路）、work（打字）
+- `walk_to_desk()` → 从门口走到工位
+- `celebrate()` → 发售庆祝跳跃
+
+**office_scene.gd**
+- 管理办公室视觉布局
+- 像素画地板/墙壁/家具
+- 连接 GameManager 信号自动更新
 
 ### ui/ — 界面层
 
 **hud.gd（绑定在 Main 节点）**
 - 连接所有按钮的 pressed 信号
-- 连接 GameManager 的 day_passed / game_shipped 信号
-- `_update_ui()` → 刷新状态文字
+- 连接 GameManager 的信号更新状态
+- TopBar 显示状态，BottomBar 显示事件和按钮
 
 **弹窗面板：**
-- `show_project_panel()` → 显示项目创建面板
-- `show_hire_panel()` → 显示招聘面板
-- `show_result(result)` → 显示发售结果
-
-## 场景节点树 (main.tscn)
-
-```
-Main (Control + hud.gd)
-├── BG (ColorRect)                    # 背景色
-├── VBox (VBoxContainer)
-│   ├── TopBar (HBoxContainer)
-│   │   ├── Title (Label)             # "独立游戏公司模拟"
-│   │   ├── Spacer (Control)
-│   │   └── SpeedLabel (Label)        # "速度: 1x"
-│   ├── HSep (HSeparator)
-│   ├── StatusLabel (Label)           # 状态信息（资金/日期/员工）
-│   ├── HSep2 (HSeparator)
-│   ├── EventLabel (Label)            # 事件通知
-│   └── ButtonBar (HBoxContainer)
-│       ├── BtnStart (Button)         # "开始"
-│       ├── BtnPause (Button)         # "暂停"
-│       ├── BtnProject (Button)       # "项目"
-│       └── BtnHire (Button)          # "招聘"
-├── TimeSystem (Node + time_system.gd)
-├── ProjectPanel (Control + project_panel.gd)  # 默认隐藏
-├── HirePanel (Control + hire_panel.gd)        # 默认隐藏
-└── ResultPanel (Control + result_panel.gd)    # 默认隐藏
-```
+- `ProjectPanel` → 创建项目（类型/题材/平台选择）
+- `HirePanel` → 招聘员工（随机候选人列表）
+- `ResultPanel` → 发售结果（评分/销量/收入）
 
 ## 游戏数值设计
 
@@ -144,7 +161,6 @@ Main (Control + hud.gd)
 
 ### 员工薪资
 - 基础 500 + 技能等级 × 500 + 随机 0~500
-- 技能1级 ≈ 1000~1500/月，技能5级 ≈ 3000~3500/月
 
 ### 项目开发
 - 每个方向（设计/程序/美术/音效）需要 1000 点进度
@@ -184,14 +200,16 @@ Main (Control + hud.gd)
 
 ## 扩展指南
 
+### 替换像素画为正式美术资源
+1. 在 `pixel_builder.gd` 中添加新的纹理生成函数，或直接加载外部图片
+2. `employee_sprite.gd` 的 `_build_frames()` 替换为加载 SpriteSheet
+3. `office_scene.gd` 的家具纹理替换为外部素材
+
 ### 添加新职业
 1. `employee.gd` 的 `get_role_name()` 加匹配项
-2. `game_manager.gd` 的 `get_employee_pool()` 的 role_list 加类型
-3. `project.gd` 的 `develop()` 加对应贡献逻辑
-
-### 添加新游戏类型/题材
-1. `game_manager.gd` 的 `genres` / `themes` 数组加值
-2. `compatibility` 字典加对应兼容性数据
+2. `pixel_builder.gd` 的 `_char_palette()` 加角色颜色
+3. `game_manager.gd` 的 `get_employee_pool()` 的 role_list 加类型
+4. `project.gd` 的 `develop()` 加对应贡献逻辑
 
 ### 添加新功能
 - 存档系统：用 FileAccess 保存/加载 company 数据
@@ -199,11 +217,9 @@ Main (Control + hud.gd)
 - 办公室升级：在 company 中添加 office_level 逻辑
 - 更多事件：在 event_system.gd 的 random_events 数组中添加
 
-## 调试
+## 技术栈
 
-所有关键函数都有 `print()` 输出。运行时查看 Godot 编辑器底部的 **输出面板** 查看日志。
-
-## 已知问题
-
-- Windows 上可能有 WASAPI 音频错误 → 项目设置 → 音频 → 驱动 → 改为 WinSound
-- 如果界面显示"加载中"不更新 → 检查 Main 节点是否绑定了 hud.gd 脚本
+- 引擎：Godot 4.6 (GL Compatibility)
+- 像素字体：Zpix（最像素）v3.1.11
+- 渲染：Nearest 纹理过滤，像素锐利
+- 架构：信号驱动 MVC，CanvasLayer 分层渲染
