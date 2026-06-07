@@ -24,18 +24,18 @@ var quality: Dictionary = {}
 var is_finished: bool = false
 var bug_count: int = 0
 
-func develop(employees: Array) -> void:
+func develop(employees: Array[Employee]) -> void:
 	if is_finished:
 		return
 
 	# Tech tree bonuses
 	var tech_bonuses := {}
 	if GameManager and GameManager.tech_tree:
-		for effect in ["program", "art", "audio", "design"]:
+		for effect: String in ["program", "art", "audio", "design"]:
 			tech_bonuses[effect] = GameManager.tech_tree.get_bonus(effect)
 		var _bug_reduce = GameManager.tech_tree.get_bonus("bug_reduce")
 
-	for emp in employees:
+	for emp: Employee in employees:
 		var contribution = emp.work()
 		# Apply tech bonus
 		match emp.role:
@@ -59,7 +59,7 @@ func develop(employees: Array) -> void:
 		emp.gain_experience(1)
 
 	# Cap progress at required values
-	for key in progress:
+	for key: String in progress:
 		progress[key] = minf(progress[key], required[key])
 
 	if _all_done():
@@ -67,19 +67,19 @@ func develop(employees: Array) -> void:
 		is_finished = true
 
 func _all_done() -> bool:
-	for key in progress:
+	for key: String in progress:
 		if progress[key] < required[key]:
 			return false
 	return true
 
 func _calculate_quality() -> void:
-	var design_score = (progress["design"] / required["design"]) * 100.0
-	var program_score = (progress["program"] / required["program"]) * 100.0
-	var art_score = (progress["art"] / required["art"]) * 100.0
-	var audio_score = (progress["audio"] / required["audio"]) * 100.0
+	var design_score: float = (progress["design"] / required["design"]) * 100.0
+	var program_score: float = (progress["program"] / required["program"]) * 100.0
+	var art_score: float = (progress["art"] / required["art"]) * 100.0
+	var audio_score: float = (progress["audio"] / required["audio"]) * 100.0
 
 	# Bug 降低技术分
-	var bug_penalty = bug_count * 2.0
+	var bug_penalty: float = bug_count * 2.0
 
 	quality = {
 		"fun": design_score * 0.5 + program_score * 0.2 + randf() * 10,
@@ -92,7 +92,7 @@ func _calculate_quality() -> void:
 func get_total_progress() -> float:
 	var total = 0.0
 	var max_total = 0.0
-	for key in progress:
+	for key: String in progress:
 		total += progress[key]
 		max_total += required[key]
 	return total / max_total * 100.0

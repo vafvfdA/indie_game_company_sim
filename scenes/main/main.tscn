@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=14 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/hud.gd" id="1_hud"]
 [ext_resource type="Script" path="res://scripts/ui/project_panel.gd" id="2_proj"]
@@ -8,6 +8,11 @@
 [ext_resource type="Script" path="res://scripts/visual/office_scene.gd" id="6_office"]
 [ext_resource type="Script" path="res://scripts/ui/train_panel.gd" id="7_train"]
 [ext_resource type="Script" path="res://scripts/ui/tech_panel.gd" id="8_tech"]
+[ext_resource type="Script" path="res://scripts/ui/manage_panel.gd" id="9_manage"]
+[ext_resource type="Script" path="res://scripts/ui/log_panel.gd" id="10_log"]
+[ext_resource type="Script" path="res://scripts/ui/confirm_dialog.gd" id="11_confirm"]
+[ext_resource type="Script" path="res://scripts/ui/game_over_panel.gd" id="12_gameover"]
+[ext_resource type="Script" path="res://scripts/ui/notification_system.gd" id="13_notify"]
 
 [node name="Main" type="Control"]
 layout_mode = 3
@@ -53,7 +58,22 @@ layout_mode = 2
 
 [node name="SpeedLabel" type="Label" parent="TopBar/HBox"]
 layout_mode = 2
-text = "速度: 1x"
+text = "1x"
+
+[node name="SpeedButtons" type="HBoxContainer" parent="TopBar/HBox"]
+layout_mode = 2
+
+[node name="Btn1x" type="Button" parent="TopBar/HBox/SpeedButtons"]
+layout_mode = 2
+text = "1x"
+
+[node name="Btn2x" type="Button" parent="TopBar/HBox/SpeedButtons"]
+layout_mode = 2
+text = "2x"
+
+[node name="Btn3x" type="Button" parent="TopBar/HBox/SpeedButtons"]
+layout_mode = 2
+text = "3x"
 
 [node name="BottomBar" type="PanelContainer" parent="."]
 layout_mode = 1
@@ -123,6 +143,16 @@ text = "保存"
 layout_mode = 2
 size_flags_horizontal = 3
 text = "读档"
+
+[node name="BtnManage" type="Button" parent="BottomBar/VBox/ExtraBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "管理"
+
+[node name="BtnLog" type="Button" parent="BottomBar/VBox/ExtraBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "日志"
 
 [node name="TimeSystem" type="Node" parent="."]
 script = ExtResource("5_time")
@@ -402,3 +432,214 @@ size_flags_horizontal = 3
 [node name="BtnClose" type="Button" parent="TechPanel/Panel/VBox"]
 layout_mode = 2
 text = "关闭"
+
+[node name="ManagePanel" type="Control" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("9_manage")
+
+[node name="Dim" type="ColorRect" parent="ManagePanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0.6)
+
+[node name="Panel" type="PanelContainer" parent="ManagePanel"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -220.0
+offset_right = 300.0
+offset_bottom = 220.0
+
+[node name="VBox" type="VBoxContainer" parent="ManagePanel/Panel"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="ManagePanel/Panel/VBox"]
+layout_mode = 2
+text = "员工管理"
+horizontal_alignment = 1
+
+[node name="InfoLabel" type="Label" parent="ManagePanel/Panel/VBox"]
+layout_mode = 2
+text = ""
+
+[node name="ScrollContainer" type="ScrollContainer" parent="ManagePanel/Panel/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+custom_minimum_size = Vector2(0, 300)
+
+[node name="EmployeeList" type="VBoxContainer" parent="ManagePanel/Panel/VBox/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="BtnClose" type="Button" parent="ManagePanel/Panel/VBox"]
+layout_mode = 2
+text = "关闭"
+
+[node name="LogPanel" type="Control" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("10_log")
+
+[node name="Dim" type="ColorRect" parent="LogPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0.6)
+
+[node name="Panel" type="PanelContainer" parent="LogPanel"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -250.0
+offset_top = -250.0
+offset_right = 250.0
+offset_bottom = 250.0
+
+[node name="VBox" type="VBoxContainer" parent="LogPanel/Panel"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="LogPanel/Panel/VBox"]
+layout_mode = 2
+text = "事件日志"
+horizontal_alignment = 1
+
+[node name="InfoLabel" type="Label" parent="LogPanel/Panel/VBox"]
+layout_mode = 2
+text = ""
+
+[node name="ScrollContainer" type="ScrollContainer" parent="LogPanel/Panel/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+custom_minimum_size = Vector2(0, 350)
+
+[node name="LogList" type="VBoxContainer" parent="LogPanel/Panel/VBox/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="BtnClose" type="Button" parent="LogPanel/Panel/VBox"]
+layout_mode = 2
+text = "关闭"
+
+[node name="ConfirmDialog" type="Control" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+z_index = 50
+script = ExtResource("11_confirm")
+
+[node name="Dim" type="ColorRect" parent="ConfirmDialog"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0.7)
+
+[node name="Panel" type="PanelContainer" parent="ConfirmDialog"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -180.0
+offset_top = -100.0
+offset_right = 180.0
+offset_bottom = 100.0
+
+[node name="VBox" type="VBoxContainer" parent="ConfirmDialog/Panel"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="ConfirmDialog/Panel/VBox"]
+layout_mode = 2
+text = "确认"
+horizontal_alignment = 1
+
+[node name="DescLabel" type="Label" parent="ConfirmDialog/Panel/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+text = ""
+horizontal_alignment = 1
+
+[node name="ButtonBar" type="HBoxContainer" parent="ConfirmDialog/Panel/VBox"]
+layout_mode = 2
+alignment = 1
+
+[node name="BtnConfirm" type="Button" parent="ConfirmDialog/Panel/VBox/ButtonBar"]
+layout_mode = 2
+text = "确认"
+
+[node name="BtnCancel" type="Button" parent="ConfirmDialog/Panel/VBox/ButtonBar"]
+layout_mode = 2
+text = "取消"
+
+[node name="GameOverPanel" type="Control" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+z_index = 60
+script = ExtResource("12_gameover")
+
+[node name="Dim" type="ColorRect" parent="GameOverPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0.8)
+
+[node name="Panel" type="PanelContainer" parent="GameOverPanel"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = -180.0
+offset_right = 200.0
+offset_bottom = 180.0
+
+[node name="VBox" type="VBoxContainer" parent="GameOverPanel/Panel"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="GameOverPanel/Panel/VBox"]
+layout_mode = 2
+text = "游戏结束"
+horizontal_alignment = 1
+
+[node name="StatsLabel" type="Label" parent="GameOverPanel/Panel/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+text = ""
+
+[node name="BtnRestart" type="Button" parent="GameOverPanel/Panel/VBox"]
+layout_mode = 2
+text = "重新开始"
+
+[node name="NotificationSystem" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+script = ExtResource("13_notify")

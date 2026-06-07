@@ -16,6 +16,13 @@ var random_events: Array = [
 	{"text": "紧急Bug修复，损失 1500 元", "chance": 0.025, "effect": "_event_urgent_bug"},
 	{"text": "税务审计，损失 5000 元", "chance": 0.008, "effect": "_event_tax_audit"},
 	{"text": "办公室设备损坏，损失 1000 元", "chance": 0.02, "effect": "_event_equipment"},
+	{"text": "参加行业大会，声望+15", "chance": 0.01, "effect": "_event_conference"},
+	{"text": "员工生日派对，全员士气提升！", "chance": 0.03, "effect": "_event_birthday"},
+	{"text": "竞品大作发布，声望-5", "chance": 0.02, "effect": "_event_competitor"},
+	{"text": "玩家社区爆发，声望+20，收入+5000", "chance": 0.005, "effect": "_event_community"},
+	{"text": "获得政府补贴 10000 元！", "chance": 0.003, "effect": "_event_subsidy"},
+	{"text": "遭受黑客攻击，损失 8000 元", "chance": 0.005, "effect": "_event_hack"},
+	{"text": "核心员工情绪低落", "chance": 0.01, "effect": "_event_key_employee_risk"},
 ]
 
 func emit_event(text: String):
@@ -25,18 +32,18 @@ func emit_event(text: String):
 	event_occurred.emit(text)
 
 func check_random_events():
-	for event in random_events:
+	for event: Dictionary in random_events:
 		if randf() < event["chance"]:
 			emit_event(event["text"])
 			call(event["effect"])
 
 func _event_morale_down():
-	for emp in GameManager.company.employees:
-		emp.morale = clampf(emp.morale - 0.1, 0, 1)
+	for emp: Employee in GameManager.company.employees:
+		emp.modify_morale(-0.1)
 
 func _event_morale_up():
-	for emp in GameManager.company.employees:
-		emp.morale = clampf(emp.morale + 0.15, 0, 1)
+	for emp: Employee in GameManager.company.employees:
+		emp.modify_morale(0.15)
 
 func _event_reputation_up():
 	GameManager.company.reputation += 5
@@ -62,9 +69,38 @@ func _event_tax_audit():
 func _event_equipment():
 	GameManager.company.spend(1000)
 
+func _event_conference():
+	GameManager.company.reputation += 15
+
+func _event_birthday():
+	for emp: Employee in GameManager.company.employees:
+		emp.modify_morale(0.1)
+
+func _event_competitor():
+	GameManager.company.reputation -= 5
+
+func _event_community():
+	GameManager.company.reputation += 20
+	GameManager.company.earn(5000)
+	GameManager.money_changed.emit(GameManager.company.money)
+
+func _event_subsidy():
+	GameManager.company.earn(10000)
+	GameManager.money_changed.emit(GameManager.company.money)
+
+func _event_hack():
+	GameManager.company.spend(8000)
+	GameManager.money_changed.emit(GameManager.company.money)
+
+func _event_key_employee_risk():
+	if GameManager.company.employees.size() > 0:
+		var emp: Employee = GameManager.company.employees[randi() % GameManager.company.employees.size()]
+		emp.modify_morale(-0.3)
+		emit_event("%s 情绪低落..." % emp.name)
+
 func get_recent_logs(count: int = 10) -> String:
 	var lines: PackedStringArray = []
-	var start = max(0, event_log.size() - count)
+	var start: int = maxi(0, event_log.size() - count)
 	for i in range(start, event_log.size()):
 		lines.append(event_log[i])
 	return "\n".join(lines)

@@ -22,7 +22,7 @@ func show_project_panel():
 		]
 		btn_confirm.disabled = true
 	else:
-		var hint = GameManager.get_market_hint()
+		var hint: String = GameManager.get_market_hint()
 		info_label.text = "创建新项目"
 		if not hint.is_empty():
 			info_label.text += "\n" + hint
@@ -32,25 +32,25 @@ func show_project_panel():
 
 func _setup_options():
 	genre_option.clear()
-	for genre in GameManager.genres:
+	for genre: String in GameManager.genres:
 		genre_option.add_item(genre)
 
 	theme_option.clear()
-	for t in GameManager.themes:
+	for t: String in GameManager.themes:
 		theme_option.add_item(t)
 
 	platform_option.clear()
-	for platform in GameManager.platforms:
+	for platform: String in GameManager.platforms:
 		platform_option.add_item(platform)
 
 func _on_confirm():
-	var game_name = name_input.text
+	var game_name: String = name_input.text
 	if game_name.is_empty():
 		game_name = "游戏 #%d" % (GameManager.company.game_history.size() + 1)
 
-	var genre = genre_option.get_item_text(genre_option.selected)
-	var game_theme = theme_option.get_item_text(theme_option.selected)
-	var platform = platform_option.get_item_text(platform_option.selected)
+	var genre: String = genre_option.get_item_text(genre_option.selected)
+	var game_theme: String = theme_option.get_item_text(theme_option.selected)
+	var platform: String = platform_option.get_item_text(platform_option.selected)
 
 	if GameManager.start_project(game_name, genre, game_theme, platform):
 		print("项目已创建: ", game_name)

@@ -15,12 +15,19 @@ extends Control
 @onready var btn_upgrade: Button = $BottomBar/VBox/ExtraBar/BtnUpgrade
 @onready var btn_save: Button = $BottomBar/VBox/ExtraBar/BtnSave
 @onready var btn_load: Button = $BottomBar/VBox/ExtraBar/BtnLoad
+@onready var btn_manage: Button = $BottomBar/VBox/ExtraBar/BtnManage
+@onready var btn_log: Button = $BottomBar/VBox/ExtraBar/BtnLog
 
 @onready var project_panel = $ProjectPanel
 @onready var hire_panel = $HirePanel
 @onready var result_panel = $ResultPanel
 @onready var train_panel = $TrainPanel
 @onready var tech_panel = $TechPanel
+@onready var manage_panel = $ManagePanel
+@onready var log_panel = $LogPanel
+@onready var confirm_dialog = $ConfirmDialog
+@onready var game_over_panel = $GameOverPanel
+@onready var notification_system = $NotificationSystem
 
 func _ready():
 	# 半透明紧凑面板样式
@@ -55,8 +62,24 @@ func _ready():
 	btn_upgrade.pressed.connect(_on_upgrade_pressed)
 	btn_save.pressed.connect(_on_save_pressed)
 	btn_load.pressed.connect(_on_load_pressed)
+	btn_manage.pressed.connect(_on_manage_pressed)
+	btn_log.pressed.connect(_on_log_pressed)
+
+	# Speed buttons
+	var btn_1x: Button = $TopBar/HBox/SpeedButtons/Btn1x
+	var btn_2x: Button = $TopBar/HBox/SpeedButtons/Btn2x
+	var btn_3x: Button = $TopBar/HBox/SpeedButtons/Btn3x
+	if btn_1x: btn_1x.pressed.connect(_on_speed_1x)
+	if btn_2x: btn_2x.pressed.connect(_on_speed_2x)
+	if btn_3x: btn_3x.pressed.connect(_on_speed_3x)
+
+	GameManager.game_over.connect(_on_game_over)
 
 	btn_pause.disabled = true
+
+	# Setup manage panel confirm dialog
+	if manage_panel and confirm_dialog:
+		manage_panel.setup_confirm_dialog(confirm_dialog)
 
 	_update_ui()
 
@@ -94,12 +117,26 @@ func _on_upgrade_pressed():
 	if not GameManager.company.can_upgrade():
 		event_label.text = "办公室已满级！"
 		return
-	var cost = GameManager.company.get_upgrade_cost()
+	var cost: int = GameManager.company.get_upgrade_cost()
 	if not GameManager.company.can_afford(cost):
 		event_label.text = "资金不足！需要 %d 元" % cost
 		return
-	GameManager.upgrade_office()
-	_update_ui()
+	if confirm_dialog:
+		confirm_dialog.show_dialog(
+			"升级办公室",
+			"确定花费 %d 元升级到 Lv%d？\n工位: %d → %d" % [
+				cost, GameManager.company.office_level + 1,
+				GameManager.company.max_desks, GameManager.company.max_desks + 4
+			],
+			"升级"
+		)
+		confirm_dialog.confirmed.connect(func():
+			GameManager.upgrade_office()
+			_update_ui()
+		, CONNECT_ONE_SHOT)
+	else:
+		GameManager.upgrade_office()
+		_update_ui()
 
 func _on_save_pressed():
 	GameManager.save_game(0)
@@ -111,11 +148,45 @@ func _on_load_pressed():
 	else:
 		event_label.text = "没有找到存档"
 
+func _on_manage_pressed():
+	if manage_panel:
+		manage_panel.show_manage_panel()
+
+func _on_log_pressed():
+	if log_panel:
+		log_panel.show_log_panel()
+
+func _on_game_over(reason: String):
+	if time_system:
+		time_system.stop()
+	btn_start.disabled = false
+	btn_pause.disabled = true
+	if game_over_panel:
+		game_over_panel.show_game_over(reason)
+
+func _on_speed_1x():
+	if time_system:
+		time_system.set_speed(1.0)
+	speed_label.text = "1x"
+
+func _on_speed_2x():
+	if time_system:
+		time_system.set_speed(2.0)
+	speed_label.text = "2x"
+
+func _on_speed_3x():
+	if time_system:
+		time_system.set_speed(3.0)
+	speed_label.text = "3x"
+
 func _update_ui():
 	if GameManager and GameManager.company:
-		status_label.text = GameManager.get_status_text()
+		var text = GameManager.get_status_text()
 		if GameManager.current_project:
-			status_label.text += GameManager.current_project.get_progress_detail()
+			text += GameManager.current_project.get_progress_detail()
+		# Rival ranking
+		text += "\n--- 排名 ---\n" + GameManager.get_rival_ranking()
+		status_label.text = text
 		# Update upgrade button text
 		if btn_upgrade:
 			if GameManager.company.can_upgrade():
@@ -123,9 +194,12 @@ func _update_ui():
 			else:
 				btn_upgrade.text = "已满级"
 		# Update rank display in title
-		var title_label = $TopBar/HBox/Title
+		var title_label: Label = $TopBar/HBox/Title
 		if title_label and GameManager.company:
 			title_label.text = GameManager.company.get_rank_title()
+		# Speed label
+		if speed_label:
+			speed_label.text = "%.0fx" % GameManager.game_speed
 
 func _on_event(text: String):
 	event_label.text = "事件: " + text

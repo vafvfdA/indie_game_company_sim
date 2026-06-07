@@ -14,7 +14,7 @@ func show_tech_panel():
 	show()
 
 func _refresh_list():
-	for child in research_list.get_children():
+	for child: Node in research_list.get_children():
 		child.queue_free()
 
 	var tt := GameManager.tech_tree

@@ -4,7 +4,7 @@ class_name Company
 var name: String = "独立工作室"
 var money: int = 50000
 var reputation: float = 0.0
-var employees: Array = []
+var employees: Array[Employee] = []
 var game_history: Array = []
 var office_level: int = 1
 
@@ -17,7 +17,7 @@ func get_upgrade_cost() -> int:
 	return office_level * 10000
 
 func can_upgrade() -> bool:
-	return office_level < 3
+	return office_level < 5
 
 func upgrade_office() -> bool:
 	if not can_upgrade():
@@ -64,24 +64,24 @@ func earn(amount: int):
 
 func pay_salaries() -> int:
 	var total = 0
-	for emp in employees:
+	for emp: Employee in employees:
 		total += emp.salary
 		spend(emp.salary)
 	return total
 
 func get_monthly_salary() -> int:
 	var total = 0
-	for emp in employees:
+	for emp: Employee in employees:
 		total += emp.salary
 	return total
 
-func hire(employee) -> bool:
+func hire(employee: Employee) -> bool:
 	if can_afford(employee.salary):
 		employees.append(employee)
 		return true
 	return false
 
-func fire(employee):
+func fire(employee: Employee):
 	employees.erase(employee)
 
 func get_employee_count() -> int:
@@ -91,6 +91,6 @@ func get_average_skill() -> float:
 	if employees.is_empty():
 		return 0.0
 	var total = 0.0
-	for emp in employees:
+	for emp: Employee in employees:
 		total += emp.skill
 	return total / employees.size()

@@ -13,15 +13,15 @@ func show_train_panel():
 	show()
 
 func _refresh_list():
-	for child in employee_list.get_children():
+	for child: Node in employee_list.get_children():
 		child.queue_free()
 
-	for emp in GameManager.company.employees:
+	for emp: Employee in GameManager.company.employees:
 		var hbox := HBoxContainer.new()
 
 		var label := Label.new()
-		label.text = "%s | %s | 技能:%d | 士气:%.0f%%" % [
-			emp.name, emp.get_role_name(), emp.skill, emp.morale * 100
+		label.text = "%s | %s | 技能:%d | 士气:%.0f%% | %s" % [
+			emp.name, emp.get_role_name(), emp.skill, emp.morale * 100, emp.personality
 		]
 		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		hbox.add_child(label)

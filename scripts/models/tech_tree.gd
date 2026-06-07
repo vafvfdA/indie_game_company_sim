@@ -14,7 +14,7 @@ var research_progress: int = 0
 
 func get_bonus(effect_name: String) -> float:
 	var total := 0.0
-	for r in researches:
+	for r: Dictionary in researches:
 		if r["done"] and r["effect"] == effect_name:
 			total += r["value"]
 	return total
@@ -34,7 +34,7 @@ func advance_day() -> Dictionary:
 	if current_index < 0:
 		return {}
 	research_progress += 1
-	var r = researches[current_index]
+	var r: Dictionary = researches[current_index]
 	if research_progress >= r["days"]:
 		r["done"] = true
 		var completed := current_index
@@ -62,7 +62,7 @@ func deserialize(data: Dictionary):
 	var raw: Array = data.get("researches", [])
 	if raw.size() > 0:
 		researches.clear()
-		for item in raw:
+		for item: Dictionary in raw:
 			researches.append(item as Dictionary)
 	current_index = data.get("current_index", -1)
 	research_progress = data.get("research_progress", 0)

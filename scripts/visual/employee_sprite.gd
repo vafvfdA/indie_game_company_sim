@@ -29,12 +29,14 @@ func setup(emp: Employee, pos: Vector2):
 
 	_sprite.play("idle")
 
+	tree_exiting.connect(_kill_tween)
+
 func _build_frames(role: String) -> SpriteFrames:
 	# Try loading from sprite sheets first
 	var base_path := "res://assets/sprites/characters/%s/" % role
-	var sheets := {}
+	var sheets: Dictionary = {}
 
-	for anim in ["idle", "walk", "work"]:
+	for anim: String in ["idle", "walk", "work"]:
 		var path := base_path + anim + ".png"
 		if ResourceLoader.exists(path):
 			sheets[anim] = {"path": path, "fps": 8.0 if anim != "work" else 4.0}
@@ -92,6 +94,8 @@ func walk_to_desk(entrance_pos: Vector2):
 	_tween = create_tween()
 	_tween.tween_property(self, "position", desk_position, 1.0).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
 	_tween.finished.connect(func():
+		if not is_instance_valid(self):
+			return
 		_sprite.flip_h = false
 		_sprite.play("idle")
 	)
@@ -103,6 +107,8 @@ func celebrate():
 	_tween.tween_property(self, "position:y", position.y - 20, 0.15).set_ease(Tween.EASE_OUT)
 	_tween.tween_property(self, "position:y", desk_position.y, 0.2).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_BOUNCE)
 	_tween.finished.connect(func():
+		if not is_instance_valid(self):
+			return
 		if is_working:
 			_sprite.play("work")
 		else:

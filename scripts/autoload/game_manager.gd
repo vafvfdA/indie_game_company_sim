@@ -10,6 +10,7 @@ signal employee_fired(employee)
 signal employee_trained(employee)
 signal office_upgraded
 signal game_loaded
+signal game_over(reason)
 
 var company: Company
 var tech_tree: RefCounted
@@ -19,6 +20,8 @@ var current_month: int = 1
 var current_year: int = 1
 var is_paused: bool = false
 var game_speed: float = 1.0
+var rival_companies: Array = []
+var _game_over_triggered: bool = false
 
 var genres: Array = ["RPG", "SLG", "ACT", "AVG", "STG", "PUZ", "SIM", "SPG"]
 var themes: Array = ["奇幻", "科幻", "都市", "历史", "恐怖", "日常", "武侠", "末日"]
@@ -39,6 +42,8 @@ func _ready():
 	print("GameManager _ready")
 	company = Company.new()
 	tech_tree = load("res://scripts/models/tech_tree.gd").new()
+	rival_companies = RivalCompany.create_default_rivals()
+	_game_over_triggered = false
 	print("Company 创建完成, 资金: ", company.money)
 
 func start_project(game_name: String, genre: String, theme: String, platform: String) -> bool:
@@ -51,9 +56,9 @@ func start_project(game_name: String, genre: String, theme: String, platform: St
 	current_project.theme = theme
 	current_project.target_platform = platform
 
-	var emp_count = company.get_employee_count()
+	var emp_count: int = company.get_employee_count()
 	var scale = clampf(1.0 + (emp_count - 1) * 0.3, 1.0, 3.0)
-	for key in current_project.required:
+	for key: String in current_project.required:
 		current_project.required[key] *= scale
 
 	print("项目创建: ", game_name, " ", genre, "/", theme, "/", platform)
@@ -79,12 +84,16 @@ func advance_day():
 				EventSystem.emit_event("交租金: 支出 %d 元" % rent)
 			else:
 				EventSystem.emit_event("交不起租金！员工士气下降")
-				for emp in company.employees:
-					emp.morale = clampf(emp.morale - 0.2, 0, 1)
+				for emp: Employee in company.employees:
+					emp.modify_morale(-0.2)
 
 		if current_month > 12:
 			current_month = 1
 			current_year += 1
+
+		# Update rival companies
+		for rival: RivalCompany in rival_companies:
+			rival.monthly_update()
 
 	# Employee raise demands (every 60 days)
 	var total_days = (current_year - 1) * 360 + (current_month - 1) * 30 + current_day
@@ -98,29 +107,47 @@ func advance_day():
 
 	advance_research()
 
+	# Social personality bonus
+	for emp: Employee in company.employees:
+		if emp.personality == "社交":
+			for other: Employee in company.employees:
+				if other != emp:
+					other.modify_morale(0.005)
+
+	# Employee auto-quit on low morale
+	_check_employee_quit()
+
+	# Game over check
+	_check_game_over()
+
 	day_passed.emit()
 
 func _ship_game():
-	var result = _calculate_sales(current_project)
+	var result: Dictionary = _calculate_sales(current_project)
 	company.earn(result["revenue"])
 	company.game_history.append(result)
-	company.reputation += result["score"] - 5.0
-	company.reputation = clampf(company.reputation, -100, 100)
+	var rep_gain: float = result["score"] - 5.0
+	# Rival competition pressure
+	var pressure: float = get_rival_pressure()
+	rep_gain *= 1.0 / (1.0 + pressure)
+	company.reputation += rep_gain
+	company.reputation = clampf(company.reputation, -100, 300)
 	money_changed.emit(company.money)
 	game_shipped.emit(result)
 	current_project = null
 
 func _calculate_sales(project: GameProject) -> Dictionary:
-	var base_score = project.quality["overall"]
+	var base_score: float = project.quality["overall"]
 
-	var compat_mult = 1.0
+	var compat_mult: float = 1.0
 	if project.genre in compatibility:
-		if project.theme in compatibility[project.genre]:
-			compat_mult = compatibility[project.genre][project.theme]
+		var theme_compat: Dictionary = compatibility[project.genre]
+		if project.theme in theme_compat:
+			compat_mult = theme_compat[project.theme]
 	compat_mult += tech_tree.get_bonus("compat")
 	compat_mult += get_market_bonus(project.genre, project.theme)
 
-	var final_score = clampf(base_score * compat_mult, 0, 100)
+	var final_score: float = clampf(base_score * compat_mult, 0, 100)
 
 	var grade = "S"
 	if final_score < 90: grade = "A"
@@ -157,21 +184,22 @@ func _calculate_sales(project: GameProject) -> Dictionary:
 
 func get_employee_pool() -> Array:
 	var pool: Array = []
-	var role_list = ["programmer", "artist", "designer", "musician"]
-	var name_pool = ["小明", "小红", "小刚", "小丽", "大伟", "小芳", "阿强", "小美",
+	var role_list: Array[String] = ["programmer", "artist", "designer", "musician"]
+	var name_pool: Array[String] = ["小明", "小红", "小刚", "小丽", "大伟", "小芳", "阿强", "小美",
 		"老张", "小李", "阿杰", "小雪", "大卫", "小琳", "阿龙", "小云"]
 
 	for i in 6:
-		var emp = Employee.new()
+		var emp: Employee = Employee.new()
 		emp.name = name_pool[randi() % name_pool.size()]
 		emp.role = role_list[randi() % role_list.size()]
 		emp.skill = randi_range(1, 5)
 		emp.salary = 500 + emp.skill * 500 + randi_range(0, 500)
+		emp.personality = Employee.random_personality()
 		pool.append(emp)
 
 	return pool
 
-func hire_employee(employee) -> bool:
+func hire_employee(employee: Employee) -> bool:
 	if company.get_employee_count() >= company.max_desks:
 		EventSystem.emit_event("工位已满！请先升级办公室。")
 		return false
@@ -184,23 +212,59 @@ func hire_employee(employee) -> bool:
 	not_enough_money.emit()
 	return false
 
-func fire_employee(employee):
+func fire_employee(employee: Employee):
 	company.fire(employee)
 	employee_fired.emit(employee)
 
+func _check_employee_quit():
+	var to_fire: Array = []
+	for emp: Employee in company.employees:
+		if emp.morale < 0.1 and randf() < 0.08:
+			to_fire.append(emp)
+	for emp: Employee in to_fire:
+		EventSystem.emit_event("%s 因士气过低离职了！" % emp.name)
+		fire_employee(emp)
+
+func _check_game_over():
+	if _game_over_triggered:
+		return
+	if company.money < -5000 and current_project == null:
+		_game_over_triggered = true
+		game_over.emit("公司破产！资金耗尽。")
+
+func get_rival_ranking() -> String:
+	var player_score: float = company.reputation + company.money * 0.001
+	var all_scores: Array = [{"name": company.name, "score": player_score, "is_player": true}]
+	for rival: RivalCompany in rival_companies:
+		all_scores.append({"name": rival.name, "score": rival.reputation + rival.money * 0.001, "is_player": false})
+	all_scores.sort_custom(func(a: Dictionary, b: Dictionary): return a["score"] > b["score"])
+	var lines: PackedStringArray = []
+	for i in all_scores.size():
+		var entry: Dictionary = all_scores[i]
+		var prefix: String = "→ " if entry["is_player"] else "  "
+		lines.append("%s%d. %s (声望:%.0f)" % [prefix, i + 1, entry["name"], entry["score"]])
+	return "\n".join(lines)
+
+func get_rival_pressure() -> float:
+	var avg_rep := 0.0
+	for rival: RivalCompany in rival_companies:
+		avg_rep += rival.reputation
+	avg_rep /= rival_companies.size()
+	return avg_rep * 0.01
+
 # --- Training ---
 
-func get_train_cost(employee) -> int:
+func get_train_cost(employee: Employee) -> int:
 	return employee.skill * 1000 + 500
 
-func train_employee(employee) -> bool:
-	var cost = get_train_cost(employee)
+func train_employee(employee: Employee) -> bool:
+	var cost: int = get_train_cost(employee)
 	if not company.can_afford(cost):
 		not_enough_money.emit()
 		return false
 	company.spend(cost)
 	employee.gain_experience(employee.skill * 10)
-	employee.morale = clampf(employee.morale + 0.1, 0, 1)
+	employee.modify_morale(0.1)
 	money_changed.emit(company.money)
 	employee_trained.emit(employee)
 	EventSystem.emit_event("培训了 %s，技能提升！" % employee.name)
@@ -219,7 +283,7 @@ func upgrade_office() -> bool:
 # --- Tech Tree ---
 
 func start_research(index: int) -> bool:
-	var cost = tech_tree.researches[index]["cost"]
+	var cost: int = tech_tree.researches[index]["cost"]
 	if not company.can_afford(cost):
 		not_enough_money.emit()
 		return false
@@ -230,14 +294,14 @@ func start_research(index: int) -> bool:
 	return true
 
 func advance_research():
-	var result = tech_tree.advance_day()
+	var result: Dictionary = tech_tree.advance_day()
 	if result.get("completed"):
 		EventSystem.emit_event("研究完成: %s！" % result["name"])
 
 # --- Employee Raises ---
 
 func _check_raise_demands():
-	for emp in company.employees:
+	for emp: Employee in company.employees:
 		if emp.salary < 3000:
 			emp.salary += 200
 			EventSystem.emit_event("%s 要求涨薪！新工资: %d" % [emp.name, emp.salary])
@@ -255,13 +319,13 @@ var _market_demand: Dictionary = {
 
 func get_market_hint() -> String:
 	if current_month in _market_demand:
-		var m = _market_demand[current_month]
+		var m: Dictionary = _market_demand[current_month]
 		return "当前热门: %s+%s (%s)" % [m["genre"], m["theme"], m["desc"]]
 	return ""
 
 func get_market_bonus(genre: String, theme: String) -> float:
 	if current_month in _market_demand:
-		var m = _market_demand[current_month]
+		var m: Dictionary = _market_demand[current_month]
 		if m["genre"] == genre and m["theme"] == theme:
 			return 0.2
 	return 0.0
@@ -274,7 +338,7 @@ func get_status_text() -> String:
 	text += "员工: %d/%d人 | 月工资: %d\n" % [company.get_employee_count(), company.max_desks, company.get_monthly_salary()]
 	text += "办公室: Lv%d\n" % company.office_level
 	if tech_tree.is_researching():
-		var r = tech_tree.researches[tech_tree.current_index]
+		var r: Dictionary = tech_tree.researches[tech_tree.current_index]
 		text += "研究: %s (%.0f%%)\n" % [r["name"], tech_tree.get_progress_percent()]
 	if current_project:
 		text += "\n当前项目: %s\n" % current_project.game_name
@@ -297,6 +361,7 @@ func save_game(slot: int = 0):
 		"current_day": current_day,
 		"current_month": current_month,
 		"current_year": current_year,
+		"rivals": _serialize_rivals(),
 	}
 	var json := JSON.stringify(data)
 	var path := "user://save_%d.json" % slot
@@ -312,7 +377,7 @@ func load_game(slot: int = 0) -> bool:
 	var file := FileAccess.open(path, FileAccess.READ)
 	var json := file.get_as_text()
 	file.close()
-	var parsed = JSON.parse_string(json)
+	var parsed: Variant = JSON.parse_string(json)
 	if parsed == null:
 		return false
 	_apply_save_data(parsed)
@@ -324,7 +389,7 @@ func has_save(slot: int) -> bool:
 
 func _serialize_employees() -> Array:
 	var arr := []
-	for emp in company.employees:
+	for emp: Employee in company.employees:
 		arr.append({
 			"name": emp.name,
 			"role": emp.role,
@@ -332,7 +397,14 @@ func _serialize_employees() -> Array:
 			"salary": emp.salary,
 			"morale": emp.morale,
 			"experience": emp.experience,
+			"personality": emp.personality,
 		})
+	return arr
+
+func _serialize_rivals() -> Array:
+	var arr := []
+	for rival: RivalCompany in rival_companies:
+		arr.append({"name": rival.name, "reputation": rival.reputation, "money": rival.money})
 	return arr
 
 func _apply_save_data(data: Dictionary):
@@ -343,7 +415,7 @@ func _apply_save_data(data: Dictionary):
 	company.game_history = data["company"].get("game_history", [])
 	company.employees.clear()
 
-	for edata in data["company"].get("employees", []):
+	for edata: Dictionary in data["company"].get("employees", []):
 		var emp := Employee.new()
 		emp.name = edata["name"]
 		emp.role = edata["role"]
@@ -351,6 +423,7 @@ func _apply_save_data(data: Dictionary):
 		emp.salary = edata["salary"]
 		emp.morale = edata["morale"]
 		emp.experience = edata["experience"]
+		emp.personality = edata.get("personality", Employee.random_personality())
 		company.employees.append(emp)
 
 	tech_tree.deserialize(data.get("tech_tree", {}))
@@ -358,9 +431,19 @@ func _apply_save_data(data: Dictionary):
 	current_month = data.get("current_month", 1)
 	current_year = data.get("current_year", 1)
 	current_project = null
+	_game_over_triggered = false
+
+	# Restore rivals
+	var rivals_data: Array = data.get("rivals", [])
+	if rivals_data.size() > 0:
+		rival_companies.clear()
+		for rd: Dictionary in rivals_data:
+			rival_companies.append(RivalCompany.new(rd["name"], rd["reputation"], rd["money"]))
+	else:
+		rival_companies = RivalCompany.create_default_rivals()
 
 	day_passed.emit()
 	game_loaded.emit()
 	office_upgraded.emit()
-	for emp in company.employees:
+	for emp: Employee in company.employees:
 		employee_hired.emit(emp)

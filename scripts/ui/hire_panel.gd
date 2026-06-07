@@ -18,17 +18,17 @@ func show_hire_panel():
 	show()
 
 func _refresh_pool():
-	for child in employee_list.get_children():
+	for child: Node in employee_list.get_children():
 		child.queue_free()
 
 	current_pool = GameManager.get_employee_pool()
 
-	for emp in current_pool:
+	for emp: Employee in current_pool:
 		var hbox = HBoxContainer.new()
 
 		var label = Label.new()
-		label.text = "%s | %s | 技能:%d | 工资:%d" % [
-			emp.name, emp.get_role_name(), emp.skill, emp.salary
+		label.text = "%s | %s | 技能:%d | 工资:%d | %s" % [
+			emp.name, emp.get_role_name(), emp.skill, emp.salary, emp.personality
 		]
 		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		hbox.add_child(label)

@@ -52,8 +52,8 @@ static func load_sheet(path: String, frame_w: int, frame_h: int, frame_count: in
 static func load_character(sheets: Dictionary, frame_w: int, frame_h: int) -> SpriteFrames:
 	var sf := SpriteFrames.new()
 
-	for anim_name in sheets:
-		var info = sheets[anim_name]
+	for anim_name: String in sheets:
+		var info: Variant = sheets[anim_name]
 		var path: String
 		var frame_count: int = -1
 		var fps: float = 8.0

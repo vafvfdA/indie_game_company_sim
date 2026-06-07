@@ -56,7 +56,7 @@ func _draw_walls():
 
 func _redraw_decorations():
 	# Clear old decorations
-	for node in _decoration_nodes:
+	for node: Node in _decoration_nodes:
 		node.queue_free()
 	_decoration_nodes.clear()
 
@@ -164,7 +164,7 @@ func _on_employee_hired(emp: Employee):
 	if index >= _desk_positions.size():
 		return
 
-	var sprite_script = load("res://scripts/visual/employee_sprite.gd")
+	var sprite_script: Script = load("res://scripts/visual/employee_sprite.gd")
 	var sprite := Node2D.new()
 	sprite.set_script(sprite_script)
 	employees_node.add_child(sprite)
@@ -180,28 +180,29 @@ func _on_employee_hired(emp: Employee):
 
 func _on_employee_fired(emp: Employee):
 	if emp in _sprites:
-		var index := _sprites.values().find(_sprites[emp])
+		var sprite: Node2D = _sprites[emp]
+		var index: int = _sprites.values().find(sprite)
 		if index >= 0 and index < _desk_nodes.size():
 			_desk_nodes[index]["monitor"].texture = PixelBuilder.monitor_texture(false)
-		_sprites[emp].queue_free()
+		sprite.queue_free()
 		_sprites.erase(emp)
 
 func _on_day_passed():
 	var working := GameManager.current_project != null
-	for sprite in _sprites.values():
+	for sprite: Node2D in _sprites.values():
 		sprite.set_working(working)
 
 func _on_game_shipped(_result: Dictionary):
-	for sprite in _sprites.values():
+	for sprite: Node2D in _sprites.values():
 		sprite.celebrate()
 
 func _on_game_loaded():
 	# Clear all existing employee sprites before re-adding from save
-	for sprite in _sprites.values():
+	for sprite: Node2D in _sprites.values():
 		sprite.queue_free()
 	_sprites.clear()
 	# Reset monitor textures
-	for desk in _desk_nodes:
+	for desk: Dictionary in _desk_nodes:
 		desk["monitor"].texture = PixelBuilder.monitor_texture(false)
 	# Redraw decorations for current office level
 	_redraw_decorations()
