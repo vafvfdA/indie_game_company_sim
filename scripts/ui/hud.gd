@@ -181,12 +181,7 @@ func _on_speed_3x():
 
 func _update_ui():
 	if GameManager and GameManager.company:
-		var text = GameManager.get_status_text()
-		if GameManager.current_project:
-			text += GameManager.current_project.get_progress_detail()
-		# Rival ranking
-		text += "\n--- 排名 ---\n" + GameManager.get_rival_ranking()
-		status_label.text = text
+		status_label.text = _build_status_line()
 		# Update upgrade button text
 		if btn_upgrade:
 			if GameManager.company.can_upgrade():
@@ -200,6 +195,20 @@ func _update_ui():
 		# Speed label
 		if speed_label:
 			speed_label.text = "%.0fx" % GameManager.game_speed
+
+func _build_status_line() -> String:
+	var company: Company = GameManager.company
+	var parts: Array[String] = []
+	parts.append("%d年 %d月 %d日" % [GameManager.current_year, GameManager.current_month, GameManager.current_day])
+	parts.append("资金 %d" % company.money)
+	parts.append("声望 %.1f" % company.reputation)
+	parts.append("员工 %d/%d" % [company.get_employee_count(), company.max_desks])
+	parts.append("办公室 Lv%d" % company.office_level)
+	if GameManager.current_project:
+		parts.append("%s %.0f%%" % [GameManager.current_project.game_name, GameManager.current_project.get_total_progress()])
+	else:
+		parts.append("暂无项目")
+	return "    ".join(parts)
 
 func _on_event(text: String):
 	event_label.text = "事件: " + text

@@ -1,0 +1,3 @@
+- [Project Status](project_status.md) — Godot 4.6 indie game sim, architecture, completed features, current state
+- [User Profile](user_profile.md) — Chinese-speaking Godot dev, fast iteration style
+- [GDScript Typing](feedback_gdscript.md) — Variant inference errors in Godot 4.6, must type all Dictionary/Array accesses

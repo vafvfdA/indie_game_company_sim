@@ -21,7 +21,7 @@ func _refresh_list():
 	for i in range(start, logs.size()):
 		var label := Label.new()
 		label.text = logs[i]
-		label.add_theme_font_size_override("font_size", 12)
+		label.add_theme_font_size_override("font_size", 16)
 		label.autowrap_mode = TextServer.AUTOWRAP_WORD
 		log_list.add_child(label)
 

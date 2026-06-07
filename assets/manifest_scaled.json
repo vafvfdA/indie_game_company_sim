@@ -1,0 +1,178 @@
+{
+  "programmer": {
+    "idle": {
+      "frame_size": [
+        24,
+        32
+      ],
+      "sheet": "assets/sprites/characters/programmer/idle.png",
+      "frames": [
+        "assets/sprites/characters/programmer/frames/idle/idle_1.png",
+        "assets/sprites/characters/programmer/frames/idle/idle_2.png",
+        "assets/sprites/characters/programmer/frames/idle/idle_3.png",
+        "assets/sprites/characters/programmer/frames/idle/idle_4.png"
+      ],
+      "frames_count": 4
+    },
+    "walk": {
+      "frame_size": [
+        24,
+        32
+      ],
+      "sheet": "assets/sprites/characters/programmer/walk.png",
+      "frames": [
+        "assets/sprites/characters/programmer/frames/walk/walk_1.png",
+        "assets/sprites/characters/programmer/frames/walk/walk_2.png",
+        "assets/sprites/characters/programmer/frames/walk/walk_3.png",
+        "assets/sprites/characters/programmer/frames/walk/walk_4.png"
+      ],
+      "frames_count": 4
+    },
+    "work": {
+      "frame_size": [
+        24,
+        32
+      ],
+      "sheet": "assets/sprites/characters/programmer/work.png",
+      "frames": [
+        "assets/sprites/characters/programmer/frames/work/work_1.png",
+        "assets/sprites/characters/programmer/frames/work/work_2.png",
+        "assets/sprites/characters/programmer/frames/work/work_3.png",
+        "assets/sprites/characters/programmer/frames/work/work_4.png"
+      ],
+      "frames_count": 4
+    }
+  },
+  "artist": {
+    "idle": {
+      "frame_size": [
+        24,
+        32
+      ],
+      "sheet": "assets/sprites/characters/artist/idle.png",
+      "frames": [
+        "assets/sprites/characters/artist/frames/idle/idle_1.png",
+        "assets/sprites/characters/artist/frames/idle/idle_2.png",
+        "assets/sprites/characters/artist/frames/idle/idle_3.png",
+        "assets/sprites/characters/artist/frames/idle/idle_4.png"
+      ],
+      "frames_count": 4
+    },
+    "walk": {
+      "frame_size": [
+        24,
+        32
+      ],
+      "sheet": "assets/sprites/characters/artist/walk.png",
+      "frames": [
+        "assets/sprites/characters/artist/frames/walk/walk_1.png",
+        "assets/sprites/characters/artist/frames/walk/walk_2.png",
+        "assets/sprites/characters/artist/frames/walk/walk_3.png",
+        "assets/sprites/characters/artist/frames/walk/walk_4.png"
+      ],
+      "frames_count": 4
+    },
+    "work": {
+      "frame_size": [
+        24,
+        32
+      ],
+      "sheet": "assets/sprites/characters/artist/work.png",
+      "frames": [
+        "assets/sprites/characters/artist/frames/work/work_1.png",
+        "assets/sprites/characters/artist/frames/work/work_2.png",
+        "assets/sprites/characters/artist/frames/work/work_3.png",
+        "assets/sprites/characters/artist/frames/work/work_4.png"
+      ],
+      "frames_count": 4
+    }
+  },
+  "designer": {
+    "idle": {
+      "frame_size": [
+        24,
+        32
+      ],
+      "sheet": "assets/sprites/characters/designer/idle.png",
+      "frames": [
+        "assets/sprites/characters/designer/frames/idle/idle_1.png",
+        "assets/sprites/characters/designer/frames/idle/idle_2.png",
+        "assets/sprites/characters/designer/frames/idle/idle_3.png",
+        "assets/sprites/characters/designer/frames/idle/idle_4.png"
+      ],
+      "frames_count": 4
+    },
+    "walk": {
+      "frame_size": [
+        24,
+        32
+      ],
+      "sheet": "assets/sprites/characters/designer/walk.png",
+      "frames": [
+        "assets/sprites/characters/designer/frames/walk/walk_1.png",
+        "assets/sprites/characters/designer/frames/walk/walk_2.png",
+        "assets/sprites/characters/designer/frames/walk/walk_3.png",
+        "assets/sprites/characters/designer/frames/walk/walk_4.png"
+      ],
+      "frames_count": 4
+    },
+    "work": {
+      "frame_size": [
+        24,
+        32
+      ],
+      "sheet": "assets/sprites/characters/designer/work.png",
+      "frames": [
+        "assets/sprites/characters/designer/frames/work/work_1.png",
+        "assets/sprites/characters/designer/frames/work/work_2.png",
+        "assets/sprites/characters/designer/frames/work/work_3.png",
+        "assets/sprites/characters/designer/frames/work/work_4.png"
+      ],
+      "frames_count": 4
+    }
+  },
+  "musician": {
+    "idle": {
+      "frame_size": [
+        24,
+        32
+      ],
+      "sheet": "assets/sprites/characters/musician/idle.png",
+      "frames": [
+        "assets/sprites/characters/musician/frames/idle/idle_1.png",
+        "assets/sprites/characters/musician/frames/idle/idle_2.png",
+        "assets/sprites/characters/musician/frames/idle/idle_3.png",
+        "assets/sprites/characters/musician/frames/idle/idle_4.png"
+      ],
+      "frames_count": 4
+    },
+    "walk": {
+      "frame_size": [
+        24,
+        32
+      ],
+      "sheet": "assets/sprites/characters/musician/walk.png",
+      "frames": [
+        "assets/sprites/characters/musician/frames/walk/walk_1.png",
+        "assets/sprites/characters/musician/frames/walk/walk_2.png",
+        "assets/sprites/characters/musician/frames/walk/walk_3.png",
+        "assets/sprites/characters/musician/frames/walk/walk_4.png"
+      ],
+      "frames_count": 4
+    },
+    "work": {
+      "frame_size": [
+        24,
+        32
+      ],
+      "sheet": "assets/sprites/characters/musician/work.png",
+      "frames": [
+        "assets/sprites/characters/musician/frames/work/work_1.png",
+        "assets/sprites/characters/musician/frames/work/work_2.png",
+        "assets/sprites/characters/musician/frames/work/work_3.png",
+        "assets/sprites/characters/musician/frames/work/work_4.png"
+      ],
+      "frames_count": 4
+    }
+  }
+}

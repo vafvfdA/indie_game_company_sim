@@ -11,8 +11,8 @@ func _ready():
 	_container = VBoxContainer.new()
 	_container.alignment = BoxContainer.ALIGNMENT_END
 	_container.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	_container.position = Vector2(-260, 10)
-	_container.size = Vector2(250, 0)
+	_container.position = Vector2(-360, 15)
+	_container.size = Vector2(350, 0)
 	_container.z_index = 100
 	add_child(_container)
 
@@ -46,7 +46,7 @@ func show_notification(text: String, type: String = "info"):
 
 	var label := Label.new()
 	label.text = text
-	label.add_theme_font_size_override("font_size", 12)
+	label.add_theme_font_size_override("font_size", 16)
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD
 	panel.add_child(label)
 

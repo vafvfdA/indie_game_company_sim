@@ -35,7 +35,7 @@ script = ExtResource("6_office")
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
-offset_bottom = 40.0
+offset_bottom = 50.0
 grow_horizontal = 2
 
 [node name="HBox" type="HBoxContainer" parent="TopBar"]
@@ -81,7 +81,7 @@ anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = -110.0
+offset_top = -140.0
 grow_horizontal = 2
 grow_vertical = 0
 
@@ -179,10 +179,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -200.0
-offset_top = -200.0
-offset_right = 200.0
-offset_bottom = 200.0
+offset_left = -300.0
+offset_top = -280.0
+offset_right = 300.0
+offset_bottom = 280.0
 
 [node name="VBox" type="VBoxContainer" parent="ProjectPanel/Panel"]
 layout_mode = 2
@@ -251,10 +251,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -250.0
-offset_top = -220.0
-offset_right = 250.0
-offset_bottom = 220.0
+offset_left = -375.0
+offset_top = -330.0
+offset_right = 375.0
+offset_bottom = 330.0
 
 [node name="VBox" type="VBoxContainer" parent="HirePanel/Panel"]
 layout_mode = 2
@@ -271,7 +271,7 @@ text = "可招聘员工"
 [node name="ScrollContainer" type="ScrollContainer" parent="HirePanel/Panel/VBox"]
 layout_mode = 2
 size_flags_vertical = 3
-custom_minimum_size = Vector2(0, 280)
+custom_minimum_size = Vector2(0, 400)
 
 [node name="EmployeeList" type="VBoxContainer" parent="HirePanel/Panel/VBox/ScrollContainer"]
 layout_mode = 2
@@ -307,10 +307,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -220.0
-offset_top = -220.0
-offset_right = 220.0
-offset_bottom = 220.0
+offset_left = -330.0
+offset_top = -330.0
+offset_right = 330.0
+offset_bottom = 330.0
 
 [node name="VBox" type="VBoxContainer" parent="ResultPanel/Panel"]
 layout_mode = 2
@@ -351,10 +351,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -250.0
-offset_top = -220.0
-offset_right = 250.0
-offset_bottom = 220.0
+offset_left = -375.0
+offset_top = -330.0
+offset_right = 375.0
+offset_bottom = 330.0
 
 [node name="VBox" type="VBoxContainer" parent="TrainPanel/Panel"]
 layout_mode = 2
@@ -371,7 +371,7 @@ text = ""
 [node name="ScrollContainer" type="ScrollContainer" parent="TrainPanel/Panel/VBox"]
 layout_mode = 2
 size_flags_vertical = 3
-custom_minimum_size = Vector2(0, 280)
+custom_minimum_size = Vector2(0, 400)
 
 [node name="EmployeeList" type="VBoxContainer" parent="TrainPanel/Panel/VBox/ScrollContainer"]
 layout_mode = 2
@@ -403,10 +403,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -280.0
-offset_top = -220.0
-offset_right = 280.0
-offset_bottom = 220.0
+offset_left = -420.0
+offset_top = -330.0
+offset_right = 420.0
+offset_bottom = 330.0
 
 [node name="VBox" type="VBoxContainer" parent="TechPanel/Panel"]
 layout_mode = 2
@@ -423,7 +423,7 @@ text = ""
 [node name="ScrollContainer" type="ScrollContainer" parent="TechPanel/Panel/VBox"]
 layout_mode = 2
 size_flags_vertical = 3
-custom_minimum_size = Vector2(0, 280)
+custom_minimum_size = Vector2(0, 400)
 
 [node name="ResearchList" type="VBoxContainer" parent="TechPanel/Panel/VBox/ScrollContainer"]
 layout_mode = 2
@@ -455,10 +455,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -300.0
-offset_top = -220.0
-offset_right = 300.0
-offset_bottom = 220.0
+offset_left = -450.0
+offset_top = -330.0
+offset_right = 450.0
+offset_bottom = 330.0
 
 [node name="VBox" type="VBoxContainer" parent="ManagePanel/Panel"]
 layout_mode = 2
@@ -475,7 +475,7 @@ text = ""
 [node name="ScrollContainer" type="ScrollContainer" parent="ManagePanel/Panel/VBox"]
 layout_mode = 2
 size_flags_vertical = 3
-custom_minimum_size = Vector2(0, 300)
+custom_minimum_size = Vector2(0, 420)
 
 [node name="EmployeeList" type="VBoxContainer" parent="ManagePanel/Panel/VBox/ScrollContainer"]
 layout_mode = 2
@@ -507,10 +507,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -250.0
-offset_top = -250.0
-offset_right = 250.0
-offset_bottom = 250.0
+offset_left = -375.0
+offset_top = -375.0
+offset_right = 375.0
+offset_bottom = 375.0
 
 [node name="VBox" type="VBoxContainer" parent="LogPanel/Panel"]
 layout_mode = 2
@@ -527,7 +527,7 @@ text = ""
 [node name="ScrollContainer" type="ScrollContainer" parent="LogPanel/Panel/VBox"]
 layout_mode = 2
 size_flags_vertical = 3
-custom_minimum_size = Vector2(0, 350)
+custom_minimum_size = Vector2(0, 500)
 
 [node name="LogList" type="VBoxContainer" parent="LogPanel/Panel/VBox/ScrollContainer"]
 layout_mode = 2
@@ -560,10 +560,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -180.0
-offset_top = -100.0
-offset_right = 180.0
-offset_bottom = 100.0
+offset_left = -270.0
+offset_top = -150.0
+offset_right = 270.0
+offset_bottom = 150.0
 
 [node name="VBox" type="VBoxContainer" parent="ConfirmDialog/Panel"]
 layout_mode = 2
@@ -614,10 +614,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -200.0
-offset_top = -180.0
-offset_right = 200.0
-offset_bottom = 180.0
+offset_left = -300.0
+offset_top = -270.0
+offset_right = 300.0
+offset_bottom = 270.0
 
 [node name="VBox" type="VBoxContainer" parent="GameOverPanel/Panel"]
 layout_mode = 2
